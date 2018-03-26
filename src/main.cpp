@@ -9,14 +9,11 @@ extern "C" {
    void app_main();
 }
 
+#include <Arduino.h>
+#include <Wire.h>
 #include <stdio.h>
 #include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/semphr.h"
-#include "freertos/queue.h"
-#include "freertos/timers.h"
-#include "esp_system.h"
+//#include "esp_system.h"
 #include "driver/gpio.h"
 #include "motion/control.h"
 
@@ -27,7 +24,7 @@ void blink(void *pvParameter)
   gpio_pad_select_gpio(BLINK_GPIO);
   /* Set the GPIO as a push/pull output */
   gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-
+  uint8_t teste; 
   for(;;)
   {
     /* Blink off (output low) */
@@ -43,14 +40,26 @@ void blink(void *pvParameter)
 /**
   * @brief Main App Entry point
   */
-void app_main()
+void setup()
 {
+  //Serial Init
+  Serial.begin(115200);
+  Serial.setTimeout(10);
+  while(!Serial) {}
+
+  //I2C Init - SCL=18, SDA=19, Freq=100KHz
+  Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
+
   xTaskCreate(&control, "control", configMINIMAL_STACK_SIZE+1024, NULL, 2, NULL);
   //xTaskCreate(&eventHandler, "eventHandler", configMINIMAL_STACK_SIZE+1024, NULL, 1, NULL);
+  //xTaskCreate(&interface, "interface", configMINIMAL_STACK_SIZE+1024, NULL, 1, NULL);
   //xTaskCreate(&detection, "detection", configMINIMAL_STACK_SIZE+1024, NULL, 1, NULL);
   //xTaskCreate(&triangulation, "triangulation", configMINIMAL_STACK_SIZE+1024, NULL, 1, NULL);
   xTaskCreate(&blink, "blink", 512,NULL,0,NULL);
+}
 
-  /* should never reach here! */ 
-  for(;;);
+void loop()
+{
+  //interface
+  vTaskDelay(1000);
 }

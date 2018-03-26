@@ -8,7 +8,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include "pid/PID.h"
+#define DATA_INTERVAL 	    10 // ms
 
 void control(void *pvParameter);
 
