@@ -7,10 +7,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "driver/mcpwm.h"
+#include "driver/gpio.h"
+#include <driver/dac.h>
 #include "control.h"
 #include "pinmux/pinmux.h"
 #include "imu/imu.h"
+#include "imu/MPU9250.h"
 #include "pid/PID.h"
 #include "motion/motor/motor.h"
 #include "motion/encoder/encoder.h"
@@ -20,8 +22,8 @@ PID speedPID;
 PID anglePID;
 
 //Motor objects
-Motor motor1(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, MCPWM0A, PWM1_PIN, CW1_PIN, CCW1_PIN, CS1_PIN);
-Motor motor2(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, MCPWM0B, PWM2_PIN, CW2_PIN, CCW2_PIN, CS2_PIN);
+Motor motor1(DAC_CHANNEL_1);
+Motor motor2(DAC_CHANNEL_2);
 
 //Encoder objects
 Encoder encoder1;
@@ -80,8 +82,12 @@ void control(void *pvParameter)
   float *ori;
   float speedPIDInput, anglePIDInput;
   float speedPIDOutput, anglePIDOutput;
-  boolean started = false;
-  GY80 imu;
+  boolean started = true;
+  //GY80 imu;
+  MPU9250 myIMU;
+  byte c = myIMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
+  myIMU.initMPU9250();
+
   UserControl userControl = {0, 0};
   Configuration configuration;  
  
@@ -100,9 +106,10 @@ void control(void *pvParameter)
 
       //getEvent()
 
-      ori = imu.getOrientation(1, dt);
-      //Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
-      anglePIDInput = ori[1];
+      //ori = imu.getOrientation(1, dt);
+      ori = myIMU.getOrientation(1, dt);
+      Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
+      anglePIDInput = ori[0]; //ori[1];
 
       //getSpeed();
       motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
