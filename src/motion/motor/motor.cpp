@@ -93,5 +93,5 @@ void Motor::motorOff()
 
 void Motor::currentSense()
 {
-    if ((analogRead(cspin) < CS_THRESHOLD)){}
+
 }

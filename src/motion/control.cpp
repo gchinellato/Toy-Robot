@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <Wire.h>
 #include "driver/mcpwm.h"
 #include "control.h"
 #include "pinmux/pinmux.h"
@@ -14,6 +15,7 @@
 #include "pid/PID.h"
 #include "motion/motor/motor.h"
 #include "motion/encoder/encoder.h"
+#include "../main.h"
 
 //PID objects
 PID speedPID;
@@ -72,64 +74,131 @@ void setConfiguration(Configuration *configuration)
 }
 
 void control(void *pvParameter)
-{ 
-  vTaskDelay(50);
-  float dt=0;
-  unsigned long timestamp=0;
-  unsigned long timestamp_old=0;
-  float *ori;
-  float speedPIDInput, anglePIDInput;
-  float speedPIDOutput, anglePIDOutput;
-  boolean started = false;
-  GY80 imu;
-  UserControl userControl = {0, 0};
-  Configuration configuration;  
- 
-  setConfiguration(&configuration);
+{
+    //I2C Init  
+    Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
-  vTaskDelay(50);
+    vTaskDelay(50);
 
-  for(;;)
-  {
-    timestamp = millis();
-    if ((timestamp - timestamp_old) >= DATA_INTERVAL)
+    float dt=0;
+    unsigned long timestamp=0;
+    unsigned long timestamp_old=0;
+    float *ori;
+    float speedPIDInput, anglePIDInput;
+    float speedPIDOutput, anglePIDOutput;
+    boolean started = true;
+    GY80 imu;
+
+    int command = 0;
+    int size; 
+    char *ret;
+    char receivedBuffer[255];
+    char sendBuffer[255];
+
+    UserControl userControl = {0, 0};
+    Configuration configuration;  
+
+    setConfiguration(&configuration);
+
+    vTaskDelay(50);
+
+    for(;;)
     {
-      //convert from ms to sec
-      dt = (float)(timestamp - timestamp_old)/1000.0f; 
-      timestamp_old = timestamp;
+        timestamp = millis();
+        if ((timestamp - timestamp_old) >= DATA_INTERVAL)
+        {
+            //convert from ms to sec
+            dt = (float)(timestamp - timestamp_old)/1000.0f; 
+            timestamp_old = timestamp;
 
-      //getEvent()
+            //getEvent
+            if(uxQueueMessagesWaiting(gQueueEvent))
+            {
+                xQueueReceive(gQueueEvent, &receivedBuffer, portMAX_DELAY);
 
-      ori = imu.getOrientation(1, dt);
-      //Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
-      anglePIDInput = ori[1];
+                //split string into tokens
+                ret = strtok(receivedBuffer, ",");
 
-      //getSpeed();
-      motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
-      encoder1.lastTicks = encoder1.ticks;
-      motor2.motorSpeed = (float)(encoder2.ticks - encoder2.lastTicks);
-      encoder2.lastTicks = encoder2.ticks;
+                //get command
+                command = atoi(ret);
 
-      //Set angle setpoint and compensate to reach equilibrium point
-      anglePID.setSetpoint(userControl.direction+configuration.calibratedZeroAngle);
-      anglePID.setTunings(configuration.anglePIDConKp, configuration.anglePIDConKi, configuration.anglePIDConKd);
-      //Compute Angle PID (input is current angle)
-      anglePIDOutput = anglePID.compute(anglePIDInput);
-      Serial.println("anglePIDoutput: " + String(anglePIDOutput));
+                //get number of parameters
+                //size = int(strtok(NULL, ","));
 
-      //Set PWM value
-      if (started && (abs(anglePIDInput) < ANGLE_IRRECOVERABLE)) {
-          motor1.setSpeedPercentage(anglePIDOutput+userControl.steering);
-          motor2.setSpeedPercentage(anglePIDOutput-userControl.steering);
-      }
-      else {
-          motor1.motorOff();
-          motor2.motorOff();
-      }
+                switch (command)
+                {
+                    case STARTED:
+                        started = atoi(strtok(NULL, ","));
+                        Serial.println("STARTED command: " + String(started));
+                        break;
+                    case DIRECTION:
+                        userControl.direction = atof(strtok(NULL, ","));
+                        userControl.direction /= 10;
+                        Serial.println("DIRECTION command: " + String(userControl.direction));
+                        break;
+                    case STEERING:
+                        userControl.steering = atof(strtok(NULL, ","));
+                        userControl.steering /= 10;
+                        Serial.println("STEERING command: " + String(userControl.steering));
+                        break;
+                    case ANGLE_PID_CONS:
+                        configuration.anglePIDConKp = atof(strtok(NULL, ","));
+                        configuration.anglePIDConKi = atof(strtok(NULL, ","));
+                        configuration.anglePIDConKd = atof(strtok(NULL, ","));
+                        configuration.calibratedZeroAngle = atof(strtok(NULL, ","));
+                        configuration.anglePIDLowerLimit = atof(strtok(NULL, ","));
+                        Serial.println("ANGLE_PID_CONS command: " + String(configuration.anglePIDConKp) +","+ String(configuration.anglePIDConKi) +","+ String(configuration.anglePIDConKd));
+                        Serial.println("ZERO_ANGLE command: " + String(configuration.calibratedZeroAngle));
+                        Serial.println("ANGLE_LIMITE command: " + String(configuration.anglePIDLowerLimit));
+                        break;
+                    case ZERO_ANGLE:
+                        configuration.calibratedZeroAngle = atof(strtok(NULL, ","));
+                        Serial.println("ZERO_ANGLE command: " + String(configuration.calibratedZeroAngle));
+                        break;
+                    case ANGLE_LIMITE:
+                        configuration.anglePIDLowerLimit = atof(strtok(NULL, ","));
+                        Serial.println("ANGLE_LIMITE command: " + String(configuration.anglePIDLowerLimit));
+                        break;
+                    default:
+                        Serial.println("Unknown command");
+                        break;
+                }
+            }
 
-      //notify();
+            ori = imu.getOrientation(1, dt);
+            //Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
+            anglePIDInput = ori[1];
+
+            //getSpeed();
+            motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
+            encoder1.lastTicks = encoder1.ticks;
+            motor2.motorSpeed = (float)(encoder2.ticks - encoder2.lastTicks);
+            encoder2.lastTicks = encoder2.ticks;
+
+            //Set angle setpoint and compensate to reach equilibrium point
+            anglePID.setSetpoint(userControl.direction+configuration.calibratedZeroAngle);
+            anglePID.setTunings(configuration.anglePIDConKp, configuration.anglePIDConKi, configuration.anglePIDConKd);
+            //Compute Angle PID (input is current angle)
+            anglePIDOutput = anglePID.compute(anglePIDInput);
+            Serial.println("anglePIDoutput: " + String(anglePIDOutput));
+
+            //Set PWM value
+            if (started && (abs(anglePIDInput) < ANGLE_IRRECOVERABLE))
+            {
+                motor1.setSpeedPercentage(anglePIDOutput);//+userControl.steering
+                motor2.setSpeedPercentage(anglePIDOutput); //userControl.steering
+            } else 
+            {
+                motor1.motorOff();
+                motor2.motorOff();
+            }
+                  
+            //notify
+            sprintf(sendBuffer, "%0.2f,", anglePIDInput);
+            sprintf(sendBuffer, "%s%0.2f#", sendBuffer, anglePIDOutput);
+            xQueueSend(gQueueReply, &sendBuffer, 10);
+        }
+        vTaskDelay(DATA_INTERVAL / portTICK_RATE_MS); 
     }
-    vTaskDelay(DATA_INTERVAL / portTICK_RATE_MS); 
-  }
-  vTaskDelete(NULL);
+    vTaskDelete(NULL);
 }

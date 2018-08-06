@@ -17,11 +17,11 @@
 #define ANGLE_KP_AGGR 		0.0
 #define ANGLE_KI_AGGR 		0.0
 #define ANGLE_KD_AGGR 		0.0
-#define ANGLE_KP_CONS 		1.0
+#define ANGLE_KP_CONS 		3.0
 #define ANGLE_KI_CONS 		0.0
 #define ANGLE_KD_CONS 		0.0
 #define ANGLE_IRRECOVERABLE 45.0
-#define CALIBRATED_ZERO_ANGLE 0.0
+#define CALIBRATED_ZERO_ANGLE 8.0
 #define WINDUP_GUARD 		100
 
 enum PIDTuning {

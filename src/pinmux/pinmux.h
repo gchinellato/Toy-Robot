@@ -8,8 +8,8 @@
 #ifndef PINMUX_H
 #define PINMUX_H
 
-#define I2C_SCL     GPIO_NUM_18
-#define I2C_SDA     GPIO_NUM_19
+#define I2C_SDA     GPIO_NUM_18
+#define I2C_SCL     GPIO_NUM_19
 #define I2C_FREQ    100000
 
 #define PWM1_PIN GPIO_NUM_5
