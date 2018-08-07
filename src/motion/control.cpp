@@ -12,6 +12,7 @@
 #include "control.h"
 #include "pinmux/pinmux.h"
 #include "imu/imu.h"
+#include "imu/MPU9250.h"
 #include "pid/PID.h"
 #include "motion/motor/motor.h"
 #include "motion/encoder/encoder.h"
