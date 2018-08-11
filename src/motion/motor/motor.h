@@ -24,14 +24,20 @@
 class Motor
 {
 public:
-	Motor(dac_channel_t channel);
+	Motor(mcpwm_unit_t channel, mcpwm_timer_t timer, mcpwm_operator_t opr, mcpwm_io_signals_t signals, int pinPWM, int pinCW, int pinCCW, int pinCS);
 	void setSpeedPercentage(float speed);
     void motorOff();
     void currentSense();
-	float motorSpeed;
 private:
 	void motorGo(int direct, float pwm);
-    dac_channel_t dac_num;
+    mcpwm_unit_t mcpwm_num;
+    mcpwm_io_signals_t io_signal;
+    mcpwm_timer_t timer_num;
+    mcpwm_operator_t op_num;
+    int pwmpin;
+    int inApin;
+    int inBpin;
+    int cspin;
 };
 
 #endif
