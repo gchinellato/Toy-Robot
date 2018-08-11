@@ -75,8 +75,8 @@ void udpServer(void *pvParameter){
             if (len > 0) {
                 packetBuffer[len] = 0;
             }
-            //Serial.print("Contents:");
-            //Serial.println(packetBuffer);
+            Serial.print("Contents:");
+            Serial.println(packetBuffer);
 
             xQueueSend(gQueueEvent, &packetBuffer, portMAX_DELAY);
         }

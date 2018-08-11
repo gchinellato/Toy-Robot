@@ -14,8 +14,8 @@
 WiFiUDP UdpClient;
 
 // local port to listen on
-const char * localAddr = "192.168.0.101";
-const char * udpAddress = "192.168.0.100";
+const char * localAddr = "192.168.0.101"; //ESP
+const char * udpAddress = "192.168.0.100"; //PC
 unsigned int udpPort = 5000;
 char receivedBuffer[255];
 
@@ -38,7 +38,7 @@ void udpClient(void *pvParameter){
             UdpClient.printf(receivedBuffer);
             UdpClient.endPacket(); 
         }
-        vTaskDelay(200);   
+        vTaskDelay(100);   
     }
 }
 
