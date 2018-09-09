@@ -19,7 +19,7 @@
 #define ANGLE_KD_AGGR 		0.0
 #define ANGLE_KP_CONS 		4.0
 #define ANGLE_KI_CONS 		0.0
-#define ANGLE_KD_CONS 		0.01
+#define ANGLE_KD_CONS 		0.0
 #define ANGLE_IRRECOVERABLE 45.0
 #define CALIBRATED_ZERO_ANGLE -0.5
 #define WINDUP_GUARD 		100

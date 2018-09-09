@@ -8,7 +8,10 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#define DATA_INTERVAL 	    10 // ms
+#include <Arduino.h>
+#include "pid/PID.h"
+
+#define DATA_INTERVAL 	    20 // ms
 
 enum cmd{
 	STARTED = 0,
@@ -22,27 +25,25 @@ enum cmd{
 };
 
 typedef struct configuration {
-	double speedPIDKp;
-	double speedPIDKi;
-	double speedPIDKd;
-	double speedPIDOutputLowerLimit;
-	double speedPIDOutputHigherLimit;
-	double anglePIDAggKp;
-	double anglePIDAggKi;
-	double anglePIDAggKd;
-	double anglePIDConKp;
-	double anglePIDConKi;
-	double anglePIDConKd;
-	double anglePIDLowerLimit;
-	double calibratedZeroAngle;
-	int motor1MinimumSpeed;
-	int motor2MinimumSpeed;
-} Configuration;
-
-struct UserControl {
+	float speedPIDKp;
+	float speedPIDKi;
+	float speedPIDKd;
+	float speedPIDOutputLowerLimit;
+	float speedPIDOutputHigherLimit;
+	float anglePIDAggKp;
+	float anglePIDAggKi;
+	float anglePIDAggKd;
+	float anglePIDConKp;
+	float anglePIDConKi;
+	float anglePIDConKd;
+	float anglePIDLowerLimit;
+	float calibratedZeroAngle;
+	boolean started;
 	float steering;
 	float direction;
-};
+} Configuration;
+
+extern Configuration gConfig;
 
 void setConfiguration(Configuration configuration);
 void control(void *pvParameter);

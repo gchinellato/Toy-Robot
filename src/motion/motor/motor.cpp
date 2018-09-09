@@ -20,11 +20,11 @@ Motor::Motor(mcpwm_unit_t channel, mcpwm_timer_t timer, mcpwm_operator_t opr, mc
     inBpin = pinCCW; // INB: Counter-clockwise input
     cspin = pinCS; // CS: Current sense ANALOG input
 
-    // Initialize digital pins as outputs
+    /* Initialize digital pins as outputs */
     pinMode(inApin, OUTPUT);
     pinMode(inBpin, OUTPUT);
 
-    // Initialize braked
+    /* Initialize braked */
     digitalWrite(inApin, LOW);
     digitalWrite(inBpin, LOW);
 
@@ -45,13 +45,13 @@ void Motor::motorGo(int direct, float pwm)
 {
     if (direct <= BRAKEGND)
     {
-      // Set inA
+      /* Set inA */
       if (direct <= CW)
         digitalWrite(inApin, HIGH);
       else
         digitalWrite(inApin, LOW);
 
-      // Set inB
+      /* Set inB */
       if ((direct==BRAKEVCC)||(direct==CCW))
         digitalWrite(inBpin, HIGH);
       else
@@ -62,16 +62,17 @@ void Motor::motorGo(int direct, float pwm)
         mcpwm_set_duty_type(mcpwm_num, timer_num, op_num, MCPWM_DUTY_MODE_0);
     }
 }
+
 /* set speed in percentage from -100 to 100 */
 void Motor::setSpeedPercentage(float speed)
 {
-    // anything above 100 or below -100 is invalid
+    /* anything above 100 or below -100 is invalid */
     if (speed > 100)
         speed = 100;
     else if (speed < -100)
         speed = -100;
 
-    // negative speed
+    /* negative speed */
     if (speed > 0) {
         motorGo(CW, (255/100 * speed));
     }
@@ -85,7 +86,7 @@ void Motor::setSpeedPercentage(float speed)
 
 void Motor::motorOff()
 {
-    // Initialize braked
+    /* Initialize braked */
     digitalWrite(inApin, LOW);
     digitalWrite(inBpin, LOW);
     mcpwm_set_signal_low(mcpwm_num, timer_num, op_num);

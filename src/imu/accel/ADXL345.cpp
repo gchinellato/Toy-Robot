@@ -21,7 +21,7 @@ ADXL345::ADXL345()
 {
     Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
 
-    //Enable the accelerometer
+    /* Enable the accelerometer */
 	writeTo(ADXL345_POWER_CTL, 0x08);
 }
 
@@ -107,14 +107,14 @@ int16_t ADXL345::getSignedNumber(int16_t number)
 
 void ADXL345::scale(int mode)
 {
-    //Acceleration G-Force
+    /* Acceleration G-Force */
     accVector[0] *= ACC_SCALE_MULTIPLIER;
     accVector[1] *= ACC_SCALE_MULTIPLIER;
     accVector[2] *= ACC_SCALE_MULTIPLIER;
 
     if(mode)
     {
-        //Acceleration m/s2
+        /* Acceleration m/s2 */
         accVector[0] *= EARTH_GRAVITY_MS2;
         accVector[1] *= EARTH_GRAVITY_MS2;
         accVector[2] *= EARTH_GRAVITY_MS2;
@@ -128,11 +128,11 @@ void ADXL345::applyCalibration()
 
 void ADXL345::getAccAngles()
 {
-    //180 degrees - 2D
+    /* 180 degrees - 2D */
     roll = atan2(accVector[1], accVector[2]);
     //pitch = atan2(-accVector[0], accVector[2]);
 
-    //90 degrees - 3D
+    /* 90 degrees - 3D */
     //roll = atan2(accVector[1], sqrt((accVector[0]*accVector[0]+accVector[2]*accVector[2])));
     pitch = atan2(-accVector[0], sqrt((accVector[1]*accVector[1]+accVector[2]*accVector[2])));
 

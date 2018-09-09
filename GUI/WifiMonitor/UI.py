@@ -132,7 +132,7 @@ class mainWindow(QtWidgets.QMainWindow):
         speedKdCons = self.ui.doubleSpinBox_speed_kd.value()
 
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = CMD_PID_SPEED + "," + \
+        msg = str(SPEED_PID) + "," + \
               str(speedKpCons) + "," + \
               str(speedKiCons) + "," + \
               str(speedKdCons) + "#"
@@ -156,7 +156,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def pushButton_speedZeroPID_onClicked(self):
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = CMD_PID_SPEED + "," + \
+        msg = str(SPEED_PID) + "," + \
               str(0) + "," + \
               str(0) + "," + \
               str(0) + "#"

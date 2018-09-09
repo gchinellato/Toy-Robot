@@ -10,8 +10,8 @@
 
 #define WHEEL_RADIUS 6.0 //cm
 
-//64 of motor shaft * 29 (29:1) gearbox = 1856 counter per revolution with gearbox when both A and B channels and rising and falling edges
-//16 of motor shaft * 29 (29:1) gearbox = 464 counter per revolution with gearbox when only one channel either rising or falling edges
+/* 64 of motor shaft * 29 (29:1) gearbox = 1856 counter per revolution with gearbox when both A and B channels and rising and falling edges */
+/* 16 of motor shaft * 29 (29:1) gearbox = 464 counter per revolution with gearbox when only one channel either rising or falling edges */
 #define TICKS_PER_TURN 464
 
 void encoderISR1();

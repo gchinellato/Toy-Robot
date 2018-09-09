@@ -11,23 +11,15 @@
 #include "udp_server.h"
 #include "../../main.h"
 
-int status = WL_IDLE_STATUS;
 char ssid[] = "TP-LINK_533A6C"; //  your network SSID (name)
 char pass[] = "00533A6C";    // your network password (use for WPA, or use as key for WEP)
-int keyIndex = 0;            // your network key Index number (needed only for WEP)
-
 unsigned int localPort = 5001;      // local port to listen on
 
-char packetBuffer[255]; //buffer to hold incoming packet
-char  ReplyBuffer[] = "acknowledged";       // a string to send back
-
-WiFiUDP Udp;
+WiFiUDP UdpServer;
 
 void WifiInit(){
     WiFi.disconnect(true);
     
-    Serial.println();
-    Serial.println();
     Serial.print("Connecting to ");
     Serial.println(ssid);
 
@@ -47,56 +39,91 @@ void WifiInit(){
     printWifiStatus();
 
     Serial.println("\nStarting connection to server...");
-    // if you get a connection, report back via serial:
-    Udp.begin(localPort);
+    UdpServer.begin(localPort);
 }
 
 void udpServer(void *pvParameter){
+    char packetBuffer[255];
+
     WifiInit();
 
     vTaskDelay(50);
 
-    printWifiStatus();
-
     for(;;){
-        // if there's data available, read a packet
-        int packetSize = Udp.parsePacket();
+        /* if there's data available, read a packet */
+        int packetSize = UdpServer.parsePacket();
         if (packetSize) {
-            Serial.print("Received packet of size ");
-            Serial.println(packetSize);
-            Serial.print("From ");
-            IPAddress remoteIp = Udp.remoteIP();
-            Serial.print(remoteIp);
-            Serial.print(", port ");
-            Serial.println(Udp.remotePort());
+            //Serial.print("Received packet of size ");
+            //Serial.println(packetSize);
 
-            // read the packet into packetBufffer
-            int len = Udp.read(packetBuffer, 255);
+            /* read the packet into packetBuffer */
+            int len = UdpServer.read(packetBuffer, 255);
             if (len > 0) {
                 packetBuffer[len] = 0;
             }
-            Serial.print("Contents:");
-            Serial.println(packetBuffer);
-
-            xQueueSend(gQueueEvent, &packetBuffer, portMAX_DELAY);
+            //Serial.println(packetBuffer);
+            parseEvent(packetBuffer);
         }
-        vTaskDelay(250);
+        vTaskDelay(50);
     }
 }
 
 void printWifiStatus() {
-  // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
   Serial.println(WiFi.SSID());
-
-  // print your WiFi shield's IP address:
-  IPAddress ip = WiFi.localIP();
   Serial.print("IP Address: ");
-  Serial.println(ip);
-
-  // print the received signal strength:
-  long rssi = WiFi.RSSI();
+  Serial.println(WiFi.localIP());
   Serial.print("signal strength (RSSI):");
-  Serial.print(rssi);
+  Serial.print(WiFi.RSSI());
   Serial.println(" dBm");
+}
+
+void parseEvent(char *buffer){
+    int command = 0;
+    int size; 
+    char *ret;
+
+    /* split string into tokens */
+    ret = strtok(buffer, ",");
+
+    /* get command */
+    command = atoi(ret);
+
+    //get number of parameters
+    //size = int(strtok(NULL, ","));
+
+    switch (command)
+    {
+        case STARTED:
+            gConfig.started = atoi(strtok(NULL, ","));
+            break;
+        case DIRECTION:
+            gConfig.direction = atof(strtok(NULL, ","));
+            gConfig.direction /= 20;
+            break;
+        case STEERING:
+            gConfig.steering = atof(strtok(NULL, ","));
+            gConfig.steering /= 20;
+            break;
+        case SPEED_PID:
+            gConfig.speedPIDKp = atof(strtok(NULL, ","));
+            gConfig.speedPIDKi = atof(strtok(NULL, ","));
+            gConfig.speedPIDKd = atof(strtok(NULL, ","));
+            break;                        
+        case ANGLE_PID_CONS:
+            gConfig.anglePIDConKp = atof(strtok(NULL, ","));
+            gConfig.anglePIDConKi = atof(strtok(NULL, ","));
+            gConfig.anglePIDConKd = atof(strtok(NULL, ","));
+            gConfig.calibratedZeroAngle = atof(strtok(NULL, ","));
+            gConfig.anglePIDLowerLimit = atof(strtok(NULL, ","));
+            break;
+        case ZERO_ANGLE:
+            gConfig.calibratedZeroAngle = atof(strtok(NULL, ","));
+            break;
+        case ANGLE_LIMITE:
+            gConfig.anglePIDLowerLimit = atof(strtok(NULL, ","));
+            break;
+        default:
+            break;
+    }
 }

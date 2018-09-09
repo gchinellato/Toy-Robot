@@ -34,13 +34,13 @@ float Encoder::getRadius()
     return radius;
 }
 
-/*Get the distance (cm) from the stacionary position, checking the current ticks multiplied by one complete turn in tickes*/
+/* Get the distance (cm) from the stacionary position, checking the current ticks multiplied by one complete turn in tickes */
 float Encoder::getDistance()
 {
     return ticks * cmPerTick;
 }
 
-//Set the the lenght of the wheel, C=2*pi*radius/ticksPerTurn
+/* Set the the lenght of the wheel, C=2*pi*radius/ticksPerTurn */
 void Encoder::setCmPerTick()
 {
     if(ticksPerTurn > 0)
@@ -49,13 +49,13 @@ void Encoder::setCmPerTick()
     }
 }
 
-/*Set radius of the wheels in cm*/
+/* Set radius of the wheels in cm */
 void Encoder::setRadius(float radius)
 {
     this->radius = radius;
 }
 
-/*Set the number of tick to complete one turn*/
+/* Set the number of tick to complete one turn */
 void Encoder::setTicksPerTurn(int ticksPerTurn)
 {
     this->ticksPerTurn = ticksPerTurn;

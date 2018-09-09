@@ -9,9 +9,9 @@ L3G4200D::L3G4200D()
 {
 	Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
 
-    //Enable gyro (Normal mode - X,Y,Z axes)
+    /* Enable gyro (Normal mode - X,Y,Z axes) */
 	writeTo(L3G4200D_CTRL_REG1, 0x0F);
-    //Full scale selection (2000 dps)
+    /* Full scale selection (2000 dps) */
     writeTo(L3G4200D_CTRL_REG4, 0x30);
 }
 
