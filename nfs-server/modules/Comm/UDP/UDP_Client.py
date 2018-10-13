@@ -47,17 +47,10 @@ class UDP_ClientThread(threading.Thread):
         logging.info("UDP Client Thread Started")
         #Open socket through UDP/IP
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        lastTime = 0.0
 
         while not self._stopEvent.wait(self._sleepPeriod):
             try: 
                 self._lock.acquire()
-
-                currentTime = time.time()
-
-                #Calculate time since the last time it was called
-                #if (self.debug & MODULE_CLIENT_UDP):
-                #    logging.debug("Duration: " + str(currentTime - lastTime))
 
                 UDP_MSG = self.getMessage() 
                 UDP_MSG = str.encode(UDP_MSG)
@@ -73,7 +66,6 @@ class UDP_ClientThread(threading.Thread):
                 pass  
 
             finally:
-                lastTime = currentTime
                 self._lock.release()
     
     #Override method  
@@ -92,38 +84,3 @@ class UDP_ClientThread(threading.Thread):
         if not self._workQueue.full(): 
             self._workQueue.put(msg)  
 
-    def convertTo(self, value, fromMax, fromMin, toMax, toMin):
-        if not value >= fromMin and value <= fromMax:
-            logging.warning("Value out of the range (Max:"+str(fromMax)+" , Min:"+str(fromMin)+")")
-            if value > fromMax:
-                value = fromMax
-            elif value < fromMin:
-                value = fromMin
-
-        factor = (value-fromMin)/(fromMax-fromMin)
-        return factor*(toMax-toMin)+toMin 
-
-LP = 1.0
-
-def main():
-    try:
-        clientThread = UDP_ClientThread(name="Thread-UDP-Client")
-        clientThread.daemon = True
-        clientThread.start()
-
-        i = 0.0
-        while True:            
-            udpMsg = str(datetime.datetime.now()) + "," + \
-                     str(i) + "," + \
-                     str(i) + "#"          
-            i += 1.0
-
-            print(udpMsg)
-            clientThread.putMessage(udpMsg)
-            time.sleep(LP)
-
-    except KeyboardInterrupt:  
-        clientThread.join()       
-
-if __name__ == "__main__":
-    main()

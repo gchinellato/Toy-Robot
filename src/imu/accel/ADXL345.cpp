@@ -19,7 +19,7 @@
 */
 ADXL345::ADXL345()
 {
-    Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
+    Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
     /* Enable the accelerometer */
 	writeTo(ADXL345_POWER_CTL, 0x08);

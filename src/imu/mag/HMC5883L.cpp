@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include "HMC5883L.h"
+#include "../imu.h"
 #include "driver/gpio.h"
 
 /*
@@ -15,7 +16,7 @@
  */
 HMC5883L::HMC5883L()
 {
-	Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
+	Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
 	writeTo(HMC5883L_ModeRegister, HMC5883L_MeasurementContinuous);
 	writeTo(HMC5883L_ConfigurationRegisterA, 0x18);

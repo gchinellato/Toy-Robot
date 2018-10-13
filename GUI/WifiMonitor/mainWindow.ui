@@ -99,7 +99,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>192.168.1.39</string>
+         <string>192.168.0.100</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEdit_port_server">
@@ -177,7 +177,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>192.168.1.49</string>
+         <string>192.168.0.102</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEdit_port_client">
@@ -706,7 +706,7 @@
         </rect>
        </property>
        <property name="title">
-        <string>Aggresive mode</string>
+        <string>Heading Control</string>
        </property>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_angle_ki_Aggr">
         <property name="geometry">
@@ -809,7 +809,7 @@
         </rect>
        </property>
        <property name="title">
-        <string>Conservative mode</string>
+        <string>Angle Control</string>
        </property>
        <widget class="QDoubleSpinBox" name="doubleSpinBox_angle_kp">
         <property name="geometry">
@@ -917,11 +917,14 @@
          <height>27</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
        <property name="singleStep">
-        <double>0.500000000000000</double>
+        <double>0.100000000000000</double>
        </property>
       </widget>
       <widget class="QLabel" name="label_30">
@@ -934,7 +937,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Max Incli. Angle:</string>
+        <string>CF IMU</string>
        </property>
       </widget>
      </widget>
@@ -998,11 +1001,14 @@
          <height>27</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
        <property name="singleStep">
-        <double>0.100000000000000</double>
+        <double>0.010000000000000</double>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBox_speed_ki">
@@ -1014,11 +1020,14 @@
          <height>27</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
        <property name="singleStep">
-        <double>0.010000000000000</double>
+        <double>0.000100000000000</double>
        </property>
       </widget>
       <widget class="QDoubleSpinBox" name="doubleSpinBox_speed_kd">
@@ -1030,11 +1039,14 @@
          <height>27</height>
         </rect>
        </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
        <property name="minimum">
         <double>-99.989999999999995</double>
        </property>
        <property name="singleStep">
-        <double>0.010000000000000</double>
+        <double>0.000100000000000</double>
        </property>
       </widget>
       <widget class="QPushButton" name="pushButton_speed_zero">

@@ -49,17 +49,10 @@ class UDP_ServerThread(threading.Thread):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.UDP_IP, self.UDP_PORT))
         self.sock.settimeout(2.0)
-        lastTime = 0.0
 
         while not self._stopEvent.wait(self._sleepPeriod):
             try:
                 self._lock.acquire()
-
-                currentTime = time.time()
-                #Calculate time since the last time it was called
-                #if (self.debug & MODULE_SERVER_UDP):
-                #    logging.debug("Duration: " + str(currentTime - lastTime))
-
                 strData, addr = self.sock.recvfrom(128)
                 data = self.parseData(strData)
                 self.putMessage(self.name, data)
@@ -72,7 +65,6 @@ class UDP_ServerThread(threading.Thread):
                     logging.debug("Socket Timeout")
                 pass
             finally:
-                lastTime = currentTime
                 self._lock.release()
 
     #Override method
@@ -102,25 +94,3 @@ class UDP_ServerThread(threading.Thread):
             logging.warning("Uncompleted UDP message.")
             return None
 
-LP = 0.0
-
-def main():
-    try:
-        setVerbosity("debug")
-
-        serverThread = UDP_ServerThread(name="Thread-UDP-Server", debug=MODULE_SERVER_UDP)
-        serverThread.daemon = True
-        serverThread.start()
-
-        while True:
-            UDP_MSG = serverThread.getMessage()
-            if UDP_MSG != None:
-                logging.info(UDP_MSG)
-            time.sleep(LP)
-
-    except KeyboardInterrupt:
-        logging.info("Exiting...")
-        serverThread.join()
-
-if __name__ == "__main__":
-    main()

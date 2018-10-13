@@ -1,7 +1,7 @@
 /* 
  * Project: Toy Robot
  * Platfrom: ESP32
- * Description: UDP Server
+ * Description: UDP Client
  * Owner: gchinellato
  */
 

@@ -47,12 +47,12 @@ class mainWindow(QtWidgets.QMainWindow):
         self.ui.pushButton_control_set.clicked.connect(self.pushButton_controlSet_onClicked)
 
         #Initial value
-        self.ui.doubleSpinBox_angle_kp.setValue(ANGLE_KP_CONS)
-        self.ui.doubleSpinBox_angle_ki.setValue(ANGLE_KI_CONS)
-        self.ui.doubleSpinBox_angle_kd.setValue(ANGLE_KD_CONS)
-        self.ui.doubleSpinBox_angle_kp_Aggr.setValue(ANGLE_KP_AGGR)
-        self.ui.doubleSpinBox_angle_ki_Aggr.setValue(ANGLE_KI_AGGR)
-        self.ui.doubleSpinBox_angle_kd_Aggr.setValue(ANGLE_KD_AGGR)
+        self.ui.doubleSpinBox_angle_kp.setValue(ANGLE_KP)
+        self.ui.doubleSpinBox_angle_ki.setValue(ANGLE_KI)
+        self.ui.doubleSpinBox_angle_kd.setValue(ANGLE_KD)
+        self.ui.doubleSpinBox_angle_kp_Aggr.setValue(HEADING_KP)
+        self.ui.doubleSpinBox_angle_ki_Aggr.setValue(HEADING_KI)
+        self.ui.doubleSpinBox_angle_kd_Aggr.setValue(HEADING_KD)
         self.ui.doubleSpinBox_angle_setpoint.setValue(CALIBRATED_ZERO_ANGLE)
         self.ui.doubleSpinBox_angle_max.setValue(ANGLE_LIMIT)
         self.ui.doubleSpinBox_speed_kp.setValue(SPEED_KP)
@@ -112,16 +112,19 @@ class mainWindow(QtWidgets.QMainWindow):
         angleKdAggr = self.ui.doubleSpinBox_angle_kd_Aggr.value()
 
         angleSetpoint = self.ui.doubleSpinBox_angle_setpoint.value()
-        angleMax = self.ui.doubleSpinBox_angle_max.value()
+        cf_imu = self.ui.doubleSpinBox_angle_max.value()
 
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = str(ANGLE_PID_CONS) + "," + \
+        msg = str(CMD_PID_ANGLE) + "," + \
               str(angleKpCons) + "," + \
               str(angleKiCons) + "," + \
               str(angleKdCons) + "," + \
+              str(angleKpAggr) + "," + \
+              str(angleKiAggr) + "," + \
+              str(angleKdAggr) + "," + \
               str(angleSetpoint) + "," + \
-              str(angleMax) + "#"
-
+              str(cf_imu) + "#" 
+      
         # Sending UDP packets...
         if (self.clientUDP != None):
             self.clientUDP.putMessage(msg)
@@ -132,7 +135,7 @@ class mainWindow(QtWidgets.QMainWindow):
         speedKdCons = self.ui.doubleSpinBox_speed_kd.value()
 
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = str(SPEED_PID) + "," + \
+        msg = str(CMD_PID_SPEED) + "," + \
               str(speedKpCons) + "," + \
               str(speedKiCons) + "," + \
               str(speedKdCons) + "#"
@@ -143,9 +146,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def pushButton_angleZeroPID_onClicked(self):
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = str(ANGLE_PID_CONS) + "," + \
-              str(0) + "," + \
-              str(0) + "," + \
+        msg = str(CMD_PID_ANGLE) + "," + \
               str(0) + "," + \
               str(0) + "," + \
               str(0) + "#"
@@ -156,7 +157,7 @@ class mainWindow(QtWidgets.QMainWindow):
 
     def pushButton_speedZeroPID_onClicked(self):
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = str(SPEED_PID) + "," + \
+        msg = str(CMD_PID_SPEED) + "," + \
               str(0) + "," + \
               str(0) + "," + \
               str(0) + "#"
@@ -171,9 +172,8 @@ class mainWindow(QtWidgets.QMainWindow):
         enableCV = self.ui.checkBox_en_cv.checkState()
         print(enableCV)
         #(module),(data1)(data2),(data3)(...)(#)
-        msg = str(STARTED) + "," + \
-              str(enableArduino) + "," + \
-              str(enableCV) + "#"
+        msg = str(CMD_MANAGER) + "," + \
+              str(enableArduino) + "#"
 
         # Sending UDP packets...
         if (self.clientUDP != None):

@@ -64,7 +64,7 @@ void udpServer(void *pvParameter){
             //Serial.println(packetBuffer);
             parseEvent(packetBuffer);
         }
-        vTaskDelay(50);
+        //vTaskDelay(50);
     }
 }
 
@@ -99,18 +99,20 @@ void parseEvent(char *buffer){
             break;
         case DIRECTION:
             gConfig.direction = atof(strtok(NULL, ","));
-            gConfig.direction /= 20;
+            gConfig.direction /= -25;
             break;
         case STEERING:
             gConfig.steering = atof(strtok(NULL, ","));
-            gConfig.steering /= 20;
+            gConfig.steering /= 30;
             break;
         case SPEED_PID:
             gConfig.speedPIDKp = atof(strtok(NULL, ","));
             gConfig.speedPIDKi = atof(strtok(NULL, ","));
             gConfig.speedPIDKd = atof(strtok(NULL, ","));
+            encoder1.resetTicks();
+            encoder2.resetTicks();
             break;                        
-        case ANGLE_PID_CONS:
+        case ANGLE_PID:
             gConfig.anglePIDConKp = atof(strtok(NULL, ","));
             gConfig.anglePIDConKi = atof(strtok(NULL, ","));
             gConfig.anglePIDConKd = atof(strtok(NULL, ","));
@@ -125,5 +127,8 @@ void parseEvent(char *buffer){
             break;
         default:
             break;
+
+        //taskENTER_CRITICAL();
+        //taskEXIT_CRITICAL();
     }
 }

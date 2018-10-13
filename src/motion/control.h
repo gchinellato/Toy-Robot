@@ -10,18 +10,20 @@
 
 #include <Arduino.h>
 #include "pid/PID.h"
+#include "motion/encoder/encoder.h"
 
-#define DATA_INTERVAL 	    20 // ms
+#define DATA_INTERVAL 	    8 // ms
 
 enum cmd{
 	STARTED = 0,
 	DIRECTION,
 	STEERING,
 	SPEED_PID,
-	ANGLE_PID_AGGR,
-	ANGLE_PID_CONS,
+	ANGLE_PID,
+	HEADING_PID,
 	ZERO_ANGLE,
-	ANGLE_LIMITE
+	ANGLE_LIMITE,
+	CF_IMU
 };
 
 typedef struct configuration {
@@ -30,20 +32,23 @@ typedef struct configuration {
 	float speedPIDKd;
 	float speedPIDOutputLowerLimit;
 	float speedPIDOutputHigherLimit;
-	float anglePIDAggKp;
-	float anglePIDAggKi;
-	float anglePIDAggKd;
+	float headingPIDKp;
+	float headingPIDKi;
+	float headingPIDKd;
 	float anglePIDConKp;
 	float anglePIDConKi;
 	float anglePIDConKd;
 	float anglePIDLowerLimit;
 	float calibratedZeroAngle;
 	boolean started;
+	float cf;
 	float steering;
 	float direction;
 } Configuration;
 
 extern Configuration gConfig;
+extern Encoder encoder1;
+extern Encoder encoder2;
 
 void setConfiguration(Configuration configuration);
 void control(void *pvParameter);

@@ -48,17 +48,12 @@ class SerialThread(threading.Thread):
 
         self.ser = serial.Serial()
 
-        lastTime = 0.0
-        i = 0
-
         while not self._stopEvent.wait(self._sleepPeriod):
             try:
-                currentTime = time.time()
-
                 if not self.ser.isOpen():				
                     time.sleep(2)
                     self.ser.port = prtlst.comports()[0][0]
-                    self.ser.baudrate = 19200
+                    self.ser.baudrate = 115200
                     self.ser.timeout = 5
                     logging.info(("Opening serial port " + str(self.ser.port) + "," + str(self.ser.baudrate)))
                     self.ser.open()
@@ -83,21 +78,20 @@ class SerialThread(threading.Thread):
                 UDP_MSG = None
                 LOG_MSG = ""
 
-                #write file...
+                #Writing in a file...
                 if (self.callbackFile != None and msgList != None):
                     for msg in msgList:
                         LOG_MSG += (msg + ";")
                     self.callbackFile(str(LOG_MSG))
 
+                #Sending UDP packets...
                 if msgList != None:
-                    #UDP message
                     #(module),(data1),(data2),(data3),(...)(#)
                     UDP_MSG = CMD_SERIAL
                     for msg in msgList:
                         UDP_MSG += ("," + msg)
                     UDP_MSG += "#"
 
-                #Sending UDP packets...
                 if (self.callbackUDP != None and UDP_MSG != None):
                     self.callbackUDP(UDP_MSG)
             except queue.Empty:
@@ -109,7 +103,7 @@ class SerialThread(threading.Thread):
                 self.ser.close()
                 pass
             finally:
-                lastTime = currentTime
+                pass
 
     #Override method
     def join(self, timeout=2):
@@ -134,10 +128,8 @@ class SerialThread(threading.Thread):
 
     def parseData(self, strData):
         #Check if message is completed
-        if (TRACE_BEGIN in strData) and (TRACE_END in strData):
-            #Remove begin and end chars
-            strData = strData.replace(TRACE_BEGIN,"")
-            strData = strData.replace(TRACE_END,"")
+        if ("#" in strData):
+            strData = strData.replace("#","")
             strData = strData.replace("\r","")
             strData = strData.replace("\n","")
             data = strData.split(",")
@@ -147,29 +139,26 @@ class SerialThread(threading.Thread):
             return None
 
     def checkData(self, command, msg):
-        '''(TRACE_BEGIN)(COMMAND),(NUM_PARAM),(PARAM_1),(PARAM_2),(...)(TRACE_END)'''
         if command == STARTED:
-            msg = str(command) + "," + "1" + "," + str(msg)
+            msg = str(command) + "," + str(msg)
         elif command == DIRECTION:
-            msg = self.convertTo(msg, ANALOG_MAX, ANALOG_MIN, PWM_MAX, PWM_MIN)
-            msg = str(command) + "," + "1" + "," + str(round(msg,2))
+            msg = str(command) + "," + str(round(msg,2))
         elif command == STEERING:
-            msg = self.convertTo(msg, ANALOG_MAX, ANALOG_MIN, PWM_MAX, PWM_MIN)
-            msg = str(command) + "," + "1" + "," + str(round(msg,2))
+            msg = str(command) + "," + str(round(msg,2))
         elif command == SPEED_PID:
-            msg = str(command) + "," + "3" + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
-        elif command == ANGLE_PID_AGGR:
-            msg = str(command) + "," + "3" + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
-        elif command == ANGLE_PID_CONS:
-            msg = str(command) + "," + "3" + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
+            msg = str(command) + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
+        elif command == ANGLE_PID:
+            msg = str(command) + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
+        elif command == HEADING_PID:
+            msg = str(command) + "," + str(round(msg[0],2)) + "," + str(round(msg[1],2)) + "," + str(round(msg[2],2))
         elif command == CALIBRATED_ZERO_ANGLE:
-            msg = str(command) + "," + "1" + "," + str(round(msg,2))
+            msg = str(command) + "," + str(round(msg,2))
         elif command == ANGLE_LIMIT:
-            msg = str(command) + "," + "1" + "," + str(round(msg,2))
+            msg = str(command) + "," + str(round(msg,2))
         else:
             msg = "unknown"
 
-        return TRACE_BEGIN + msg + TRACE_END + "\r\n"
+        return msg + "#" + "\r\n"
 
     def converStrToHex(self, msg):
         return ":".join("{:02x}".format(ord(c)) for c in msg)
@@ -185,26 +174,3 @@ class SerialThread(threading.Thread):
         factor = (value-fromMin)/(fromMax-fromMin)
         return factor*(toMax-toMin)+toMin
 
-def main():
-    try:
-        setVerbosity("debug")
-
-        queueToWrite = queue.Queue()
-
-        serialThread = SerialThread(name="Thread-Serial", queue=queueToWrite, debug=MODULE_SERIAL)
-        serialThread.start()
-
-        i = 0
-
-        while True:
-            logging.info("Seding packet: " + str(i))
-            serialThread.putMessage("TESTE", "ABC")
-            i += 1
-            time.sleep(1)
-
-    except KeyboardInterrupt:
-        logging.info("Exiting...")
-        serialThread.join()
-
-if __name__ == '__main__':
-    main()

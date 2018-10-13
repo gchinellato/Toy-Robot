@@ -52,21 +52,21 @@ class Worker(QtCore.QThread):
             if msg[1][0] != None:
                 self.timestamp = msg[1][0]
                 self.parent.ui.lineEdit_timestamp.setText(self.timestamp)
-            if msg[1][1] != None:
-                self.distance1 = msg[1][1]
-                self.parent.ui.lineEdit_distanceA.setText(self.distance1)
             if msg[1][2] != None:
-                self.velocity1 = msg[1][2]
-                self.parent.ui.lineEdit_velocA.setText(self.velocity1)
+                self.distance1 = msg[1][2]
+                self.parent.ui.lineEdit_distanceA.setText(self.distance1)
             if msg[1][3] != None:
-                self.outputPIDSpeed = msg[1][3]
-                self.parent.ui.lineEdit_pid_out_speed.setText(self.outputPIDSpeed)
+                self.velocity1 = msg[1][3]
+                self.parent.ui.lineEdit_velocA.setText(self.velocity1)
             if msg[1][4] != None:
-                self.pitch = msg[1][4]
+                self.outputPIDSpeed = msg[1][4]
+                self.parent.ui.lineEdit_pid_out_speed.setText(self.outputPIDSpeed)
+            if msg[1][5] != None:
+                self.pitch = msg[1][5]
                 self.parent.ui.lineEdit_pitch.setText(self.pitch)
                 self.parent.ui.lineEdit_pitch_tab_PID.setText(self.pitch)
-            if msg[1][5] != None:
-                self.outputPIDAngle = msg[1][5]
+            if msg[1][6] != None:
+                self.outputPIDAngle = msg[1][6]
                 self.parent.ui.lineEdit_pid_out_angle.setText(self.outputPIDAngle)
             if msg[0] == SERVER_UDP_NAME:
                 if msg[1][0] == CMD_SERIAL:

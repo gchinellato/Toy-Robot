@@ -25,43 +25,58 @@ float PID::compute(float input)
     float dt;
     float error;
     float de;
+    float di;
     float output;
+    float outputSat;
 
     /* Calculate delta time in seconds */
     dt = (float)(now - lastTime)/1000.0f;
 
+    float bi = (Kp*dt/Ki);
+    float ad = (Kd/(dt*N+Kd));
+    float bd = (N*Kp*ad);
+    float a0 = (dt/(Ki/20));
+
     /* Calculate error and delta error */
     error = setpoint - input;   
     de = error - lastError;
+    di = input - lastInput;
 
     /* Proportional Term */
-    Cp = error;
+    Cp = error*Kp;
 
     /* Integral Term */
-    Ci += error*dt;
+    Ci += error*Ki*dt;
 
     /* Derivative term */
     Cd = 0;
     if(dt>0){
-        Cd = de/dt;
+       Cd = (di*Kd)/dt;
     }
-
-    /* Save for the next iteration */
-    lastError = error;
-    lastTime = now;
+    //Cd = ad * Cd - bd * di;
 
     /* Sum terms: pTerm+iTerm+dTerm */
-    output = Cp*Kp + Ci*Ki + Cd*Kd;
+    output = Cp + Ci + Cd;
 
     /* Saturation - Windup guard for Integral term do not reach very large values */
     if(output > WINDUP_GUARD){
-        output = WINDUP_GUARD;
+        outputSat = WINDUP_GUARD;
     }
     else if (output < -WINDUP_GUARD){
-        output = -WINDUP_GUARD;
+        outputSat = -WINDUP_GUARD;
+    }
+    else{
+        outputSat = output;
     }
 
-    return output;
+    //Ci = Ci + bi * de + a0 * (outputSat - output);
+
+    /* Save for the next iteration */
+    lastError = error;
+    lastInput = input;
+    lastTime = now;
+
+    return outputSat;
 }
 
 void PID::setSetpoint(float value)

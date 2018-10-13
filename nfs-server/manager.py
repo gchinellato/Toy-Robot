@@ -47,7 +47,7 @@ def main(args):
             logging.info("Verboseity level: " + str(args.get("verbosity")))
 
         #Set modules to print according verbosity level
-        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_CLIENT_UDP
+        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_CLIENT_UDP | MODULE_SERIAL
 
         #Message queues to communicate between threads
         clientUDPQueue = queue.Queue()
@@ -60,16 +60,16 @@ def main(args):
         threads = []
 
         #UDP Client thread
-        clientUDP = UDP_ClientThread(name=CLIENT_UDP_NAME, queue=clientUDPQueue, debug=debug, UDP_IP="192.168.0.101", UDP_PORT=5001)
+        clientUDP = UDP_ClientThread(name=CLIENT_UDP_NAME, queue=clientUDPQueue, debug=debug, UDP_IP="192.168.0.100", UDP_PORT=5000)
         clientUDP.daemon = True
         threads.append(clientUDP)
         clientUDP.start()
 
         #UDP Server thread
-        #serverUDP = UDP_ServerThread(name=SERVER_UDP_NAME, queue=eventQueue, debug=debug, UDP_IP="", UDP_PORT=5001)
-        #serverUDP.daemon = True
-        #threads.append(serverUDP)
-        #serverUDP.start()
+        serverUDP = UDP_ServerThread(name=SERVER_UDP_NAME, queue=eventQueue, debug=debug, UDP_IP="", UDP_PORT=5001)
+        serverUDP.daemon = True
+        threads.append(serverUDP)
+        serverUDP.start()
 
         #Joystick thread
         joy = PS3_ControllerThread(name=PS3_CTRL_NAME, queue=eventQueue, debug=debug)
@@ -78,16 +78,16 @@ def main(args):
         joy.start()
 
         #Log File thread
-        #logFile = LogFileThread(name=LOG_FILE_NAME, queue=logFileQueue, debug=debug)
-        #logFile.daemon = True
-        #threads.append(logFile)
-        #logFile.start()
+        logFile = LogFileThread(name=LOG_FILE_NAME, queue=logFileQueue, debug=debug)
+        logFile.daemon = True
+        threads.append(logFile)
+        logFile.start()
 
         #Serial thread
-        #serial = SerialThread(name=SERIAL_NAME, queue=serialToWrite, COM="/dev/ttyUSB0", debug=debug, callbackUDP=clientUDP.putMessage, callbackFile=logFile.putMessage)
-        #serial.daemon = True
-        #threads.append(serial)
-        #serial.start()
+        serial = SerialThread(name=SERIAL_NAME, queue=serialToWrite, COM="/dev/ttyUSB0", debug=debug, callbackUDP=clientUDP.putMessage, callbackFile=logFile.putMessage)
+        serial.daemon = True
+        threads.append(serial)
+        serial.start()
 
         #Computer Vision thread
         tracking = ComputerVisionThread(name=TRACKING_NAME, queue=eventQueue, debug=debug)
@@ -106,6 +106,7 @@ def main(args):
 
         lastTime = 0.0
         LP = 0.0
+        runSpeedMax = 3
 
         while True:
             try:
@@ -129,30 +130,33 @@ def main(args):
                                 panTilt.putEvent((None, headH))
                             #Body run speed
                             if event[1].axis == joy.A_L3_V:
-                                runSpeed = event[1].value
-                                runSpeed = clientUDP.convertTo(runSpeed, ANALOG_MAX, ANALOG_MIN, PWM_MAX, PWM_MIN)
-                                msg = str(DIRECTION) + "," + \
-                                      str(runSpeed) + "#"
-                                clientUDP.putMessage(msg)
+                                runSpeed = -event[1].value
+                                runSpeed = serial.convertTo(runSpeed, ANALOG_MAX, ANALOG_MIN, runSpeedMax, -runSpeedMax)
+                                serial.putMessage(DIRECTION, runSpeed)
                             #Body turn speed
                             if event[1].axis == joy.A_L3_H:
-                                turnSpeed = event[1].value
-                                turnSpeed = clientUDP.convertTo(turnSpeed, ANALOG_MAX, ANALOG_MIN, PWM_MAX, PWM_MIN)
-                                msg = str(STEERING) + "," + \
-                                      str(turnSpeed) + "#"
-                                clientUDP.putMessage(msg)
+                                turnSpeed = -event[1].value
+                                turnSpeed = serial.convertTo(turnSpeed, ANALOG_MAX, ANALOG_MIN, 3, -3)
+                                serial.putMessage(STEERING, turnSpeed)
 
                         if event[1].type == pygame.JOYBUTTONDOWN or event[1].type == pygame.JOYBUTTONUP:
                             if event[1].button == joy.B_SQR:
-                                msg = str(STARTED) + "," + \
-                                      str(1) + "#"
-                                clientUDP.putMessage(msg)
+                                serial.putMessage(STARTED, 1)
                                 logging.info("Button Square")
                             if event[1].button == joy.B_CIRC:
-                                msg = str(STARTED) + "," + \
-                                      str(0) + "#"
-                                clientUDP.putMessage(msg)
+                                serial.putMessage(STARTED, 0)
                                 logging.info("Button Circle")
+                            
+                        if event[1].type == pygame.JOYBUTTONUP:
+                            if event[1].button == joy.B_L1:
+                                runSpeedMax = 3
+                                logging.info("Button release R1: " + str(runSpeedMax))
+
+                        if event[1].type == pygame.JOYBUTTONDOWN:
+                            if event[1].button == joy.B_L1:
+                                runSpeedMax = 7
+                                logging.info("Button press R1: " + str(runSpeedMax))
+                            
 
                     #IP controller
                     #[(Thread)][(module),(data1),(data2),(data3),(...)(#)]
@@ -163,7 +167,41 @@ def main(args):
                             panTilt.putEvent((headV, None))
 
                             headH = float(event[1][2])
-                            panTilt.putEvent((None, headH))   
+                            panTilt.putEvent((None, headH))  
+                        elif event[1][0] == CMD_PID_ANGLE:
+                            logging.info("Set PID Angle parameters!")
+                            angleKpCons = float(event[1][1])
+                            angleKiCons = float(event[1][2])
+                            angleKdCons = float(event[1][3])
+                            serial.putMessage(ANGLE_PID, (angleKpCons, angleKiCons, angleKdCons))
+
+                            angleKpAggr = float(event[1][4])
+                            angleKiAggr = float(event[1][5])
+                            angleKdAggr = float(event[1][6])
+                            serial.putMessage(HEADING_PID, (angleKpAggr, angleKiAggr, angleKdAggr))
+
+                            calibratedZeroAngle = float(event[1][7])
+                            serial.putMessage(CALIBRATED_ZERO_ANGLE, calibratedZeroAngle)
+
+                            cf = float(event[1][8])
+                            serial.putMessage(CF_IMU, cf)
+                        elif event[1][0] == CMD_PID_SPEED:
+                            logging.info("Set PID Speed parameters!")
+                            speedKp = float(event[1][1])
+                            speedKi = float(event[1][2])
+                            speedKd = float(event[1][3])
+                            serial.putMessage(SPEED_PID, (speedKp, speedKi, speedKd)) 
+                        elif event[1][0] == CMD_SERIAL:
+                            runSpeed = float(event[1][1])
+                            serial.putMessage(DIRECTION, runSpeed)
+                            turnSpeed = float(event[1][2])
+                            serial.putMessage(STEERING, turnSpeed)
+                        elif event[1][0] == CMD_MANAGER:
+                            enableArduino = int(event[1][1])
+                            serial.putMessage(STARTED, enableArduino)
+                            pass
+                        else:
+                            pass
 
                     #OpenCV controller
                     elif event[0] == TRACKING_NAME:

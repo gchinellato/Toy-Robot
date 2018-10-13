@@ -14,17 +14,12 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
-#include "driver/gpio.h"
-#include "driver/mcpwm.h"
 #include "pinmux/pinmux.h"
 #include "motion/control.h"
-#include "motion/pid/PID.h"
-#include "motion/encoder/encoder.h"
-#include "comm/UDP/udp_server.h"
-#include "comm/UDP/udp_client.h"
+#include "comm/serial/serial.h"
 
 /* inter-task communication queue */
-char buffer[256];
+char buffer[BUFFER_MAX];
 QueueHandle_t gQueueReply = xQueueCreate(128, sizeof(buffer));
 
 /**
@@ -32,20 +27,14 @@ QueueHandle_t gQueueReply = xQueueCreate(128, sizeof(buffer));
   */
 void setup()
 {
-  /* Serial Init */
-  Serial.begin(115200);
-  Serial.setTimeout(10);
-  while(!Serial) {}
-
   if(gQueueReply == NULL){
     Serial.println("Error creating the queue");
   }
 
   vTaskDelay(1000);
 
-  xTaskCreate(&control, "control", configMINIMAL_STACK_SIZE+8192, NULL, 255, NULL);
-  xTaskCreate(&udpServer, "UDP_Server", configMINIMAL_STACK_SIZE+8192, NULL, 12, NULL);
-  xTaskCreate(&udpClient, "UDP_Client", configMINIMAL_STACK_SIZE+8192, NULL, 10, NULL);
+  xTaskCreate(&control, "control", configMINIMAL_STACK_SIZE+8192, NULL, 11, NULL);
+  xTaskCreate(&serial, "serial", configMINIMAL_STACK_SIZE+8192, NULL, 10, NULL);
 }
 
 void loop()

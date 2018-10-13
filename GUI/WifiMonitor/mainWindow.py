@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Tue Oct 24 23:17:20 2017
-#      by: PyQt5 UI code generator 5.2.1
+# Created by: PyQt5 UI code generator 5.11.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -238,8 +237,9 @@ class Ui_MainWindow(object):
         self.label_15.setObjectName("label_15")
         self.doubleSpinBox_angle_max = QtWidgets.QDoubleSpinBox(self.groupBox_7)
         self.doubleSpinBox_angle_max.setGeometry(QtCore.QRect(450, 80, 69, 27))
+        self.doubleSpinBox_angle_max.setDecimals(5)
         self.doubleSpinBox_angle_max.setMinimum(-99.99)
-        self.doubleSpinBox_angle_max.setSingleStep(0.5)
+        self.doubleSpinBox_angle_max.setSingleStep(0.1)
         self.doubleSpinBox_angle_max.setObjectName("doubleSpinBox_angle_max")
         self.label_30 = QtWidgets.QLabel(self.groupBox_7)
         self.label_30.setGeometry(QtCore.QRect(310, 90, 141, 17))
@@ -258,18 +258,21 @@ class Ui_MainWindow(object):
         self.label_19.setObjectName("label_19")
         self.doubleSpinBox_speed_kp = QtWidgets.QDoubleSpinBox(self.groupBox_8)
         self.doubleSpinBox_speed_kp.setGeometry(QtCore.QRect(40, 20, 69, 27))
+        self.doubleSpinBox_speed_kp.setDecimals(3)
         self.doubleSpinBox_speed_kp.setMinimum(-99.99)
-        self.doubleSpinBox_speed_kp.setSingleStep(0.1)
+        self.doubleSpinBox_speed_kp.setSingleStep(0.01)
         self.doubleSpinBox_speed_kp.setObjectName("doubleSpinBox_speed_kp")
         self.doubleSpinBox_speed_ki = QtWidgets.QDoubleSpinBox(self.groupBox_8)
         self.doubleSpinBox_speed_ki.setGeometry(QtCore.QRect(40, 50, 69, 27))
+        self.doubleSpinBox_speed_ki.setDecimals(5)
         self.doubleSpinBox_speed_ki.setMinimum(-99.99)
-        self.doubleSpinBox_speed_ki.setSingleStep(0.01)
+        self.doubleSpinBox_speed_ki.setSingleStep(0.0001)
         self.doubleSpinBox_speed_ki.setObjectName("doubleSpinBox_speed_ki")
         self.doubleSpinBox_speed_kd = QtWidgets.QDoubleSpinBox(self.groupBox_8)
         self.doubleSpinBox_speed_kd.setGeometry(QtCore.QRect(40, 80, 69, 27))
+        self.doubleSpinBox_speed_kd.setDecimals(5)
         self.doubleSpinBox_speed_kd.setMinimum(-99.99)
-        self.doubleSpinBox_speed_kd.setSingleStep(0.01)
+        self.doubleSpinBox_speed_kd.setSingleStep(0.0001)
         self.doubleSpinBox_speed_kd.setObjectName("doubleSpinBox_speed_kd")
         self.pushButton_speed_zero = QtWidgets.QPushButton(self.groupBox_8)
         self.pushButton_speed_zero.setGeometry(QtCore.QRect(80, 110, 61, 27))
@@ -364,7 +367,7 @@ class Ui_MainWindow(object):
         self.groupBox_3.setTitle(_translate("MainWindow", "Client UDP"))
         self.label_3.setText(_translate("MainWindow", "IP Addr:"))
         self.label_4.setText(_translate("MainWindow", "Port:"))
-        self.lineEdit_ip_client.setText(_translate("MainWindow", "192.168.0.101"))
+        self.lineEdit_ip_client.setText(_translate("MainWindow", "192.168.0.102"))
         self.lineEdit_port_client.setText(_translate("MainWindow", "5001"))
         self.pushButton_en_client.setText(_translate("MainWindow", "Enable"))
         self.groupBox_12.setTitle(_translate("MainWindow", "Serial"))
@@ -404,15 +407,15 @@ class Ui_MainWindow(object):
         self.label_16.setText(_translate("MainWindow", "Setpoint correction:"))
         self.pushButton_angle_zero.setText(_translate("MainWindow", "Zero"))
         self.pushButton_angle_set.setText(_translate("MainWindow", "Set"))
-        self.groupBox_11.setTitle(_translate("MainWindow", "Aggresive mode"))
+        self.groupBox_11.setTitle(_translate("MainWindow", "Heading Control"))
         self.label_21.setText(_translate("MainWindow", "Ki Aggr:"))
         self.label_22.setText(_translate("MainWindow", "Kd Aggr:"))
         self.label_20.setText(_translate("MainWindow", "Kp Aggr:"))
-        self.groupBox_14.setTitle(_translate("MainWindow", "Conservative mode"))
+        self.groupBox_14.setTitle(_translate("MainWindow", "Angle Control"))
         self.label_14.setText(_translate("MainWindow", "Ki Cons:"))
         self.label_13.setText(_translate("MainWindow", "Kp Cons:"))
         self.label_15.setText(_translate("MainWindow", "Kd Cons:"))
-        self.label_30.setText(_translate("MainWindow", "Max Incli. Angle:"))
+        self.label_30.setText(_translate("MainWindow", "CF IMU"))
         self.groupBox_8.setTitle(_translate("MainWindow", "Speed Control"))
         self.label_17.setText(_translate("MainWindow", "Kp:"))
         self.label_18.setText(_translate("MainWindow", "Ki:"))

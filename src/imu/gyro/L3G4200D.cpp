@@ -7,7 +7,7 @@
 
 L3G4200D::L3G4200D()
 {
-	Wire.begin(GPIO_NUM_18, GPIO_NUM_19, 100000);
+	Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
 
     /* Enable gyro (Normal mode - X,Y,Z axes) */
 	writeTo(L3G4200D_CTRL_REG1, 0x0F);
