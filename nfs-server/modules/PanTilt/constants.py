@@ -15,10 +15,10 @@ POS_MIN = 0 # Min position 0 degree
 POS_NEUTRAL = 50 # Default position 90 degreee (neutral)
 
 #Position limits (in percentage)
-HORIZONTAL_MAX = 50
-HORIZONTAL_MIN = 0
+HORIZONTAL_MAX = 55
+HORIZONTAL_MIN = 25
 
-VERTICAL_MAX = 35
+VERTICAL_MAX = 20
 VERTICAL_MIN = 10
 
 #Angle limits

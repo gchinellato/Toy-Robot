@@ -14,7 +14,7 @@
 #include "../pinmux/pinmux.h"
 #include <math.h>
 
-#define CF 				0.96
+#define CF 				0.98
 
 class GY80
 {

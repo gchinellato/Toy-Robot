@@ -62,18 +62,18 @@ void L3G4200D::read()
     Y_L = _buff[0];
     readFrom(L3G4200D_OUT_Y_H, 1, _buff);
     Y_H = _buff[0];
-    readFrom(L3G4200D_OUT_Z_L, 1, _buff);
-    Z_L = _buff[0];
-    readFrom(L3G4200D_OUT_Z_H, 1, _buff);
-    Z_H = _buff[0];
+    //readFrom(L3G4200D_OUT_Z_L, 1, _buff);
+    //Z_L = _buff[0];
+    //readFrom(L3G4200D_OUT_Z_H, 1, _buff);
+    //Z_H = _buff[0];
 
 	gyroVector[0] = ((int16_t)X_H << 8) | X_L;
 	gyroVector[1] = ((int16_t)Y_H << 8) | Y_L;
-	gyroVector[2] = ((int16_t)Z_H << 8) | Z_L;
+	//gyroVector[2] = ((int16_t)Z_H << 8) | Z_L;
 
     gyroVector[0] = (float)getSignedNumber((int16_t)gyroVector[0]);
     gyroVector[1] = (float)getSignedNumber((int16_t)gyroVector[1]);
-    gyroVector[2] = (float)getSignedNumber((int16_t)gyroVector[2]);
+    //gyroVector[2] = (float)getSignedNumber((int16_t)gyroVector[2]);
 
 	//gyroVector[0] *= -1;
 	//gyroVector[1] *= -1;
@@ -101,7 +101,7 @@ void L3G4200D::scale()
 
 	rateVector[0] = gyroVector[0] * GYRO_SENSITIVITY;
 	rateVector[1] = gyroVector[1] * GYRO_SENSITIVITY;
-	rateVector[2] = gyroVector[2] * GYRO_SENSITIVITY;
+	//rateVector[2] = gyroVector[2] * GYRO_SENSITIVITY;
 }
 
 void L3G4200D::applyCalibration()

@@ -32,11 +32,6 @@ float PID::compute(float input)
     /* Calculate delta time in seconds */
     dt = (float)(now - lastTime)/1000.0f;
 
-    float bi = (Kp*dt/Ki);
-    float ad = (Kd/(dt*N+Kd));
-    float bd = (N*Kp*ad);
-    float a0 = (dt/(Ki/20));
-
     /* Calculate error and delta error */
     error = setpoint - input;   
     de = error - lastError;
@@ -53,7 +48,6 @@ float PID::compute(float input)
     if(dt>0){
        Cd = (di*Kd)/dt;
     }
-    //Cd = ad * Cd - bd * di;
 
     /* Sum terms: pTerm+iTerm+dTerm */
     output = Cp + Ci + Cd;
@@ -68,8 +62,6 @@ float PID::compute(float input)
     else{
         outputSat = output;
     }
-
-    //Ci = Ci + bi * de + a0 * (outputSat - output);
 
     /* Save for the next iteration */
     lastError = error;

@@ -12,7 +12,7 @@
 #include "pid/PID.h"
 #include "motion/encoder/encoder.h"
 
-#define DATA_INTERVAL 	    8 // ms
+#define DATA_INTERVAL 	    7 // ms
 
 enum cmd{
 	STARTED = 0,

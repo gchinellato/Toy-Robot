@@ -27,6 +27,7 @@ from PanTilt.constants import *
 from Utils.traces.trace import *
 from Utils.constants import *
 import time
+import picamera
 import RPi.GPIO as GPIO
 import Queue as queue
 import pygame
@@ -94,6 +95,10 @@ def main(args):
         #tracking.daemon = True
         #threads.append(tracking)
         #tracking.start()
+        camera = picamera.PiCamera()
+        camera.resolution = (800, 480)
+        camera.framerate = 60
+        camera.start_preview()
 
         #Pan-Tilt thread
         panTilt = PanTiltThread(name=PAN_TILT_NAME, queue=panTiltQueue, debug=debug, callbackUDP=clientUDP.putMessage)
@@ -122,7 +127,7 @@ def main(args):
                         if (event[1].type == pygame.JOYAXISMOTION) and (event[1].axis != joy.A_ACC_X) and (event[1].axis != joy.A_ACC_Y) and (event[1].axis != joy.A_ACC_Z):
                             #Head Vertical
                             if event[1].axis == joy.A_R3_V:
-                                headV = event[1].value
+                                headV = -event[1].value
                                 panTilt.putEvent((headV, None))
                             #Head Horizontal
                             if event[1].axis == joy.A_R3_H:
@@ -162,12 +167,12 @@ def main(args):
                     #[(Thread)][(module),(data1),(data2),(data3),(...)(#)]
                     elif event[0] == SERVER_UDP_NAME:
                         logging.debug(event[1])  
-                        if event[1][0] == CMD_PAN_TILT:
-                            headV = float(event[1][1])
-                            panTilt.putEvent((headV, None))
-
+                        if event[1][0] == "e8912037a63d":
                             headH = float(event[1][2])
-                            panTilt.putEvent((None, headH))  
+                            headH = panTilt.convertTo(headH, 50, -50, ANALOG_MAX, ANALOG_MIN)
+                            panTilt.putEvent((None, headH))                            
+                            #headV = float(event[1][2])
+                            #panTilt.putEvent((headV, None))
                         elif event[1][0] == CMD_PID_ANGLE:
                             logging.info("Set PID Angle parameters!")
                             angleKpCons = float(event[1][1])

@@ -32,10 +32,10 @@ void GY80::complementaryFilter(float G_dt, float cf, float (&orientationDeg)[3])
     accelerometer.getAccVector(accVector);
     gyro.getGyroVector(gyroVector);
 
-    magnetometer.getMagVector(magVector);
-    magnetometer.tiltCompensation(accelerometer.roll, accelerometer.pitch, compMagVector);
-    magnetometer.setDeclination(-21.0, 7.0);
-    magnetometer.getHeading(compMagVector[0], compMagVector[1], true);
+    //magnetometer.getMagVector(magVector);
+    //magnetometer.tiltCompensation(accelerometer.roll, accelerometer.pitch, compMagVector);
+    //magnetometer.setDeclination(-21.0, 7.0);
+    //magnetometer.getHeading(compMagVector[0], compMagVector[1], true);
 
     /* CF = tau / (tau+LP)
       tau = CF*LP/(1-CF)
@@ -44,5 +44,5 @@ void GY80::complementaryFilter(float G_dt, float cf, float (&orientationDeg)[3])
       orientation in degrees (pitch, roll, yaw from rotation matrix) */
     orientationDeg[0] = cf*(orientationDeg[0] + gyro.rateVector[0]*G_dt) + (1-cf)*accelerometer.roll*RAD_TO_DEG;
     orientationDeg[1] = cf*(orientationDeg[1] + gyro.rateVector[1]*G_dt) + (1-cf)*accelerometer.pitch*RAD_TO_DEG;
-    orientationDeg[2] = cf*(orientationDeg[2] + gyro.rateVector[2]*G_dt) + (1-cf)*magnetometer.heading*RAD_TO_DEG;
+    //orientationDeg[2] = cf*(orientationDeg[2] + gyro.rateVector[2]*G_dt) + (1-cf)*magnetometer.heading*RAD_TO_DEG;
 }

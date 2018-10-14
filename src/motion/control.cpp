@@ -78,7 +78,7 @@ void setConfiguration(Configuration *configuration)
     configuration->anglePIDLowerLimit = ANGLE_LIMIT;
     configuration->calibratedZeroAngle = CALIBRATED_ZERO_ANGLE;
     configuration->started = false;
-    configuration->cf = 0.9785;
+    configuration->cf = 0.99;
     configuration->steering = 0;
     configuration->direction = 0;
 }
@@ -124,7 +124,7 @@ void control(void *pvParameter)
   
     setConfiguration(&gConfig);
 
-    // Initialise the xLastWakeTime variable with the current time.
+    /* Initialise the xLastWakeTime variable with the current time */
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     for(;;)
@@ -138,7 +138,7 @@ void control(void *pvParameter)
 
             ori = imu.getOrientation(1, gConfig.cf, dt);
             anglePIDInput = ori[1];
-
+            
             /* getSpeed */
             distance1 = encoder1.getDistance();
             distance2 = -encoder2.getDistance();
