@@ -69,7 +69,7 @@ class SerialThread(threading.Thread):
                 #Read trace from arduino
                 recv = self.ser.readline()
 
-                if (self.debug & MODULE_SERIAL):
+                if (self.debug & MODULE_SERIAL):                   
                     logging.debug(("Reading from Arduino: " + str(recv)))
                     #logging.debug(("Reading from Arduino: " + self.converStrToHex(str(recv))))
 
@@ -155,6 +155,12 @@ class SerialThread(threading.Thread):
             msg = str(command) + "," + str(round(msg,2))
         elif command == ANGLE_LIMIT:
             msg = str(command) + "," + str(round(msg,2))
+        elif command == CF_IMU:
+            msg = str(command) + "," + str(round(msg,2))
+        elif command == RESET_ENCODER:
+            msg = str(command) + ","
+        elif command == POS_PID:
+            msg = str(command) + "," + str(msg)
         else:
             msg = "unknown"
 

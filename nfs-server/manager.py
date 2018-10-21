@@ -26,12 +26,14 @@ from Comm.Serial.constants import *
 from PanTilt.constants import *
 from Utils.traces.trace import *
 from Utils.constants import *
+from Utils.gpio_mapping import *
 import time
 import picamera
 import RPi.GPIO as GPIO
 import Queue as queue
 import pygame
 import argparse
+import os
 
 def argParse():
     #Construct the argument parse and parse the arguments
@@ -48,7 +50,18 @@ def main(args):
             logging.info("Verboseity level: " + str(args.get("verbosity")))
 
         #Set modules to print according verbosity level
-        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_CLIENT_UDP | MODULE_SERIAL
+        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_SERIAL | MODULE_CLIENT_UDP
+
+        #Eyes init
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(LED_RED_GPIO, GPIO.OUT)
+        GPIO.setup(LED_GREEN_GPIO, GPIO.OUT)
+        GPIO.setup(LED_BLUE_GPIO, GPIO.OUT)
+
+        GPIO.output(LED_RED_GPIO, 0)
+        GPIO.output(LED_GREEN_GPIO, 0)
+        GPIO.output(LED_BLUE_GPIO, 0)
 
         #Message queues to communicate between threads
         clientUDPQueue = queue.Queue()
@@ -81,8 +94,8 @@ def main(args):
         #Log File thread
         logFile = LogFileThread(name=LOG_FILE_NAME, queue=logFileQueue, debug=debug)
         logFile.daemon = True
-        threads.append(logFile)
-        logFile.start()
+        #threads.append(logFile)
+        #logFile.start()
 
         #Serial thread
         serial = SerialThread(name=SERIAL_NAME, queue=serialToWrite, COM="/dev/ttyUSB0", debug=debug, callbackUDP=clientUDP.putMessage, callbackFile=logFile.putMessage)
@@ -92,13 +105,13 @@ def main(args):
 
         #Computer Vision thread
         tracking = ComputerVisionThread(name=TRACKING_NAME, queue=eventQueue, debug=debug)
-        #tracking.daemon = True
-        #threads.append(tracking)
-        #tracking.start()
-        camera = picamera.PiCamera()
-        camera.resolution = (800, 480)
-        camera.framerate = 60
-        camera.start_preview()
+        tracking.daemon = True
+        threads.append(tracking)
+        tracking.start()
+        #camera = picamera.PiCamera()
+        #camera.resolution = (800, 480)
+        #camera.framerate = 60
+        #camera.start_preview()
 
         #Pan-Tilt thread
         panTilt = PanTiltThread(name=PAN_TILT_NAME, queue=panTiltQueue, debug=debug, callbackUDP=clientUDP.putMessage)
@@ -111,7 +124,9 @@ def main(args):
 
         lastTime = 0.0
         LP = 0.0
-        runSpeedMax = 3
+        runSpeedMax = RUN_SPEED
+
+        trackingEn = False
 
         while True:
             try:
@@ -145,30 +160,66 @@ def main(args):
                                 serial.putMessage(STEERING, turnSpeed)
 
                         if event[1].type == pygame.JOYBUTTONDOWN or event[1].type == pygame.JOYBUTTONUP:
-                            if event[1].button == joy.B_SQR:
+                            if event[1].button == joy.B_START:
                                 serial.putMessage(STARTED, 1)
-                                logging.info("Button Square")
-                            if event[1].button == joy.B_CIRC:
+                                serial.putMessage(SPEED_PID, (0, 0, 0))
+                                time.sleep(0.2)
+                                serial.putMessage(SPEED_PID, (5.0, 0, 0.02))
+                                GPIO.output(LED_RED_GPIO, 0)
+                                GPIO.output(LED_GREEN_GPIO, 1)
+                                GPIO.output(LED_BLUE_GPIO, 1)
+                                logging.info("Button Start")
+                            if event[1].button == joy.B_SELECT:
                                 serial.putMessage(STARTED, 0)
-                                logging.info("Button Circle")
+                                GPIO.output(LED_RED_GPIO, 0)
+                                GPIO.output(LED_GREEN_GPIO, 0)
+                                GPIO.output(LED_BLUE_GPIO, 0)
+                                logging.info("Button Select")
                             
                         if event[1].type == pygame.JOYBUTTONUP:
                             if event[1].button == joy.B_L1:
-                                runSpeedMax = 3
-                                logging.info("Button release R1: " + str(runSpeedMax))
+                                runSpeedMax = RUN_SPEED
+                                logging.info("Button release L1: " + str(runSpeedMax))
+
+                            if event[1].button == joy.B_R2:
+                                serial.putMessage(POS_PID, 0)
+                                logging.info("Button release R2")
 
                         if event[1].type == pygame.JOYBUTTONDOWN:
                             if event[1].button == joy.B_L1:
-                                runSpeedMax = 7
-                                logging.info("Button press R1: " + str(runSpeedMax))
-                            
+                                runSpeedMax = RUN_SPEED*5
+                                logging.info("Button press L1: " + str(runSpeedMax))
+
+                            if event[1].button == joy.B_R2:
+                                serial.putMessage(POS_PID, 1)
+                                logging.info("Button press R2")
+
+                            if event[1].button == joy.B_R1:
+                                logging.info("Button press R1")
+                                serial.putMessage(RESET_ENCODER, 1)
+
+                            if event[1].button == joy.B_X:
+                                logging.info("Button X") 
+                                GPIO.output(LED_RED_GPIO, 0)
+                                GPIO.output(LED_GREEN_GPIO, 1)
+                                GPIO.output(LED_BLUE_GPIO, 1)
+
+                            if event[1].button == joy.B_CIRC:
+                                logging.info("Button Circle")
+                                GPIO.output(LED_RED_GPIO, 1)
+                                GPIO.output(LED_GREEN_GPIO, 0)
+                                GPIO.output(LED_BLUE_GPIO, 0)
+                        
+                            if event[1].button == joy.B_TRI:                                
+                                trackingEn ^= 1
+                                logging.info("Button TRI: " + str(trackingEn))
 
                     #IP controller
                     #[(Thread)][(module),(data1),(data2),(data3),(...)(#)]
                     elif event[0] == SERVER_UDP_NAME:
                         logging.debug(event[1])  
                         if event[1][0] == "e8912037a63d":
-                            headH = float(event[1][2])
+                            headH = -float(event[1][2])
                             headH = panTilt.convertTo(headH, 50, -50, ANALOG_MAX, ANALOG_MIN)
                             panTilt.putEvent((None, headH))                            
                             #headV = float(event[1][2])
@@ -183,7 +234,7 @@ def main(args):
                             angleKpAggr = float(event[1][4])
                             angleKiAggr = float(event[1][5])
                             angleKdAggr = float(event[1][6])
-                            serial.putMessage(HEADING_PID, (angleKpAggr, angleKiAggr, angleKdAggr))
+                            serial.putMessage(HEADING_PID, (0.0, 0.0, 0.0))
 
                             calibratedZeroAngle = float(event[1][7])
                             serial.putMessage(CALIBRATED_ZERO_ANGLE, calibratedZeroAngle)
@@ -209,12 +260,21 @@ def main(args):
                             pass
 
                     #OpenCV controller
-                    elif event[0] == TRACKING_NAME:
+                    elif event[0] == TRACKING_NAME and trackingEn == True:
                         logging.info(event)
                         tracking.block.set()
 
                         #Delta measure from object up to center of the vision
                         dWidth, dHeight, radius = event[1]
+
+                        if (radius > 10):
+                            GPIO.output(LED_RED_GPIO, 1)
+                            GPIO.output(LED_GREEN_GPIO, 0)
+                            GPIO.output(LED_BLUE_GPIO, 0)
+                        else:
+                            GPIO.output(LED_RED_GPIO, 0)
+                            GPIO.output(LED_GREEN_GPIO, 1)
+                            GPIO.output(LED_BLUE_GPIO, 1) 
 
                         #Get current head angles
                         angleV, angleH = panTilt.getScaledAngles()
@@ -250,7 +310,6 @@ def main(args):
                             panTilt.putEvent((None, headH))
 
                         tracking.block.clear()
-
             except queue.Empty:
                 #if (debug & MODULE_MANAGER):
                     #logging.debug("Queue Empty")
@@ -261,6 +320,7 @@ def main(args):
     finally:
         logging.info("########################################")
         logging.info("Exiting...")
+        GPIO.cleanup()
         for t in threads:
             logging.info("Killing "+ str(t.name) + "...")
             t.join()

@@ -8,11 +8,12 @@
 #include <Arduino.h>
 #include "PID.h"
 
-PID::PID()
+PID::PID(float windup)
 {
     this->Ci=0;
     this->lastTime=0;
     this->lastError=0;
+    this->windup = windup;
     setTunings(0,0,0);
 }
 
@@ -53,11 +54,11 @@ float PID::compute(float input)
     output = Cp + Ci + Cd;
 
     /* Saturation - Windup guard for Integral term do not reach very large values */
-    if(output > WINDUP_GUARD){
-        outputSat = WINDUP_GUARD;
+    if(output > windup){
+        outputSat = windup;
     }
-    else if (output < -WINDUP_GUARD){
-        outputSat = -WINDUP_GUARD;
+    else if (output < -windup){
+        outputSat = -windup;
     }
     else{
         outputSat = output;

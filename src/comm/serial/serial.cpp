@@ -66,8 +66,6 @@ void parse(char *buffer){
             gConfig.speedPIDKp = atof(strtok(NULL, ","));
             gConfig.speedPIDKi = atof(strtok(NULL, ","));
             gConfig.speedPIDKd = atof(strtok(NULL, ","));
-            encoder1.resetTicks();
-            encoder2.resetTicks();
             break;                        
         case ANGLE_PID:
             gConfig.anglePIDConKp = atof(strtok(NULL, ","));
@@ -75,9 +73,9 @@ void parse(char *buffer){
             gConfig.anglePIDConKd = atof(strtok(NULL, ","));
             break;
         case HEADING_PID:
-            gConfig.headingPIDKp = atof(strtok(NULL, ","));
-            gConfig.headingPIDKi = atof(strtok(NULL, ","));
-            gConfig.headingPIDKd = atof(strtok(NULL, ","));
+            gConfig.headingPIDKp = atof(strtok(NULL, ",")) / 100;
+            gConfig.headingPIDKi = atof(strtok(NULL, ",")) / 100;
+            gConfig.headingPIDKd = atof(strtok(NULL, ",")) / 100;
             break;
         case ZERO_ANGLE:
             gConfig.calibratedZeroAngle = atof(strtok(NULL, ","));
@@ -87,6 +85,13 @@ void parse(char *buffer){
             break;
         case CF_IMU:
             gConfig.cf = atof(strtok(NULL, ","));
+            break;
+        case RESET_ENCODER:
+            encoder1.resetTicks();
+            encoder2.resetTicks();
+            break;
+        case POS_CONTROL:
+            gConfig.posControlFlag = atoi(strtok(NULL, ","));
             break;
         default:
             break;

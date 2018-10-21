@@ -14,13 +14,13 @@
 #include "../pinmux/pinmux.h"
 #include <math.h>
 
-#define CF 				0.98
+#define CF 				0.99
 
 class GY80
 {
 public:
 	GY80();
-	float* getOrientation(int algorithm, float cf, float G_dt);
+	float* getOrientation(int algorithm, float G_dt);
 	void magCalibration();
 	void accCalibration();
 	void gyrCalibration();
@@ -34,7 +34,7 @@ private:
 	float compMagVector[3];
 	float gyroVector[3];
 	float magnetoHeading(float magnetometer[3], float accelerometer[3]);
-	void complementaryFilter(float G_dt, float cf, float (&orientationDeg)[3]);
+	void complementaryFilter(float G_dt, float (&orientationDeg)[3]);
 };
 
 #endif

@@ -47,6 +47,13 @@ MB_ENCODER_2 = 8
 '''
 
 #
+# Eyes GPIOs
+#
+LED_RED_GPIO = 13
+LED_GREEN_GPIO = 26 
+LED_BLUE_GPIO = 19
+
+#
 #PanTilt GPIOs
 #
 

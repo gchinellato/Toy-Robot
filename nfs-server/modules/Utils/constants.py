@@ -38,6 +38,8 @@ ANGLE_PID_CONS = 5
 CALIBRATED_ZERO_ANGLE = 6
 ANGLE_LIMIT = 7
 CF_IMU = 8
+RESET_ENCODER = 9
+POS_PID = 10
 
 #Analog Constrains
 ANALOG_MAX = 1.0
@@ -46,3 +48,6 @@ ANALOG_MIN = -1.0
 #Position limits (in percentage)
 PWM_MAX = 100
 PWM_MIN = -100
+
+#Max Run speed
+RUN_SPEED = 0.3

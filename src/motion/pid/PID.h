@@ -9,19 +9,19 @@
 #define PID_H
 
 #define SPEED_SETPOINT		0.0
-#define SPEED_KP 			0.7
+#define SPEED_KP 			5.0
 #define SPEED_KI 			0.0
-#define SPEED_KD 			0.01
+#define SPEED_KD 			0.02
 #define ANGLE_SETPOINT 		0.0
 #define ANGLE_LIMIT 		45.0
-#define HEADING_KP 	    	3.0
+#define HEADING_KP 	    	4.5
 #define HEADING_KI   		0.0
 #define HEADING_KD 		    0.0
-#define ANGLE_KP_CONS 		6.5
+#define ANGLE_KP_CONS 		7.5
 #define ANGLE_KI_CONS 		0.01
 #define ANGLE_KD_CONS 		0.0
 #define ANGLE_IRRECOVERABLE 45.0
-#define CALIBRATED_ZERO_ANGLE 9.5
+#define CALIBRATED_ZERO_ANGLE 11.0
 #define WINDUP_GUARD 		100
 
 #define N 20
@@ -34,7 +34,7 @@ enum PIDTuning {
 class PID
 {
 public:
-	PID();
+	PID(float windup);
 	float compute (float input);
     void setSetpoint(float setpoint);
     float getSetpoint();
@@ -50,6 +50,7 @@ private:
     float Kp;
     float Ki;
     float Kd;
+    float windup;
 };
 
 #endif

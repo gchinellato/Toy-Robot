@@ -23,7 +23,9 @@ enum cmd{
 	HEADING_PID,
 	ZERO_ANGLE,
 	ANGLE_LIMITE,
-	CF_IMU
+	CF_IMU,
+	RESET_ENCODER,
+	POS_CONTROL
 };
 
 typedef struct configuration {
@@ -41,6 +43,7 @@ typedef struct configuration {
 	float anglePIDLowerLimit;
 	float calibratedZeroAngle;
 	boolean started;
+	boolean posControlFlag;
 	float cf;
 	float steering;
 	float direction;

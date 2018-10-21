@@ -37,7 +37,7 @@ class ComputerVisionThread(threading.Thread):
         self.block = threading.Event()
         self._sleepPeriod = 0.02 
 
-        self.width=640
+        self.width=800
         self.height=480      
 
         logging.info("Tracking Module initialized")
@@ -47,11 +47,12 @@ class ComputerVisionThread(threading.Thread):
         logging.info("Tracking Thread Started")
 
         #define the lower and upper boundaries in the HSV color space
-        lower, upper = self.findHSVfromRGB(0,0,255)
+        lower, upper = self.findHSVfromRGB(0,255,0)
 
         camera = picamera.PiCamera()
         camera.resolution = (self.width, self.height)
-        camera.framerate = 32
+        camera.framerate = 24
+        camera.start_preview()
         rawCapture = PiRGBArray(camera, size=(self.width, self.height)) 
 
         time.sleep(1)
@@ -83,6 +84,7 @@ class ComputerVisionThread(threading.Thread):
 
                         # find contours in the mask and initialize the current (x, y) center of the ball
                         cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+                        #logging.debug(cnts)                        
                         center = None
 
                         #Center of the window
@@ -118,6 +120,8 @@ class ComputerVisionThread(threading.Thread):
                                     logging.debug(("Radius: " + str(radius)))
 
                                 self.putEvent(self.name, (dWidth, dHeight, round(radius,2)))
+                        else:
+                            self.putEvent(self.name, (0, 0, 0))
 
                         #show the frame
                         #cv2.imshow("Frame", frame)

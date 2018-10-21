@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys #extra
 import time #extra
 from time import sleep
@@ -6,6 +8,10 @@ import speech_recognition as sr
 from time import ctime
 import os
 from gtts import gTTS
+
+mic_name = "USB Audio Device: - (hw:1,0)"
+sample_rate = 8000
+chunk_size = 2048
 
 def writeen(writeString):
     print(writeString)
@@ -16,7 +22,7 @@ def speaken(audioString):
     sfile = sfile.replace(" ", "")
     sfile = sfile.replace(",", "")
     sfile = sfile.replace("'", "")
-    os.system('mplayer /home/pi/Music/' + sfile + '.mp3') # reproduzir som 
+    os.system('omxplayer /home/pi/Music/' + sfile + '.mp3') # reproduzir som 
     
 def songfile(audioString):
     tts = gTTS(text=audioString, lang='en')
@@ -39,18 +45,28 @@ def speakpt(audioString):
     print(audioString)
     tts = gTTS(text=audioString, lang='pt', slow=False)
     tts.save("/home/pi/Music/audio.mp3")
-    os.system("mplayer /home/pi/Music/audio.mp3")
+    os.system("omxplayer /home/pi/Music/audio.mp3")
     #os.remove("audio.mp3") #remove temperory file
 
 def recordAudio():
     r = sr.Recognizer()
-    with sr.Microphone(device_index = 2, sample_rate = 48000) as source:
+    mic_list = sr.Microphone.list_microphone_names() 
+    print(mic_list)
+    
+    for i, microphone_name in enumerate(mic_list): 
+        if microphone_name == mic_name: 
+            device_id = i
+            print(device_id)
+ 
+    with sr.Microphone(device_index = device_id, sample_rate = sample_rate, chunk_size = chunk_size) as source:
         #print("Say something..")
-        audio = r.record(source, duration = 2)
-    data = ""
+        r.adjust_for_ambient_noise(source) 
+        audio = r.listen(source) 
+        #audio = r.record(source, duration = 2)
+    data = None    
     try:
-            # Uses the default API key
-            # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+        # Uses the default API key
+        # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
         data = r.recognize_google(audio, language='en-us') #en-us pt-BR'
         print("I understand: " + data) 
     except sr.UnknownValueError:
@@ -66,8 +82,8 @@ def jarvis(data):
         Thread(target=songfile, args=("I'm fine",)).start() 
  
     if "what time is it" in data:
-        speaken(ctime())    
-
+        speaken(ctime())
+ 
     if "yes" in data:
         Thread(target=songfile, args=("yes",)).start()        
         time.sleep(2.0)
@@ -94,18 +110,9 @@ def jarvis(data):
         #Thread(target=answer, args=("no",)).start() 
 
     ###Portugues###
-    if "Como voce esta" in data:
+    if "Como você esta" in data:
         speakpt("Eu estou bem")
  
-    if "Que horas são" in data:
-        speakpt(ctime())
- 
-    if "Onde fica " in data:
-        data = data.split(" ")
-        location = data[2]
-        speakpt("Espere um minuto, eu irei te mostrar onde fica " + location)
-        os.system("chromium-browser https://www.google.nl/maps/place/" + location + "/&amp;")
-
     if "diga sim" in data:
         speak("yes")
         #answer("y")
@@ -120,11 +127,12 @@ def jarvis(data):
     if "Qual seu nome" in data:
         speakpt("Eu ainda não sei meu nome")
 
-#Thread(target=songfile, args=("Hi, what can I do for you?",)).start()
+Thread(target=songfile, args=("Hi, what can I do for you?",)).start()
 songfile('Hi, what can I do for you?')  
 time.sleep(.5)
 
 while 1:
     data = recordAudio()
-    jarvis(data)
+    #jarvis(data)
+    time.sleep(1)
 
