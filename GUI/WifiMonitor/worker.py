@@ -49,6 +49,7 @@ class Worker(QtCore.QThread):
 
             #[(Thread)][(module),(data1),(data2),(data3),(...)(#)]
             #print(msg)
+           
             if msg[1][0] != None:
                 self.timestamp = msg[1][0]
                 self.parent.ui.lineEdit_timestamp.setText(self.timestamp)

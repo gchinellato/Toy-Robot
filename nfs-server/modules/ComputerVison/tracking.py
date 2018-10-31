@@ -38,7 +38,7 @@ class ComputerVisionThread(threading.Thread):
         self._sleepPeriod = 0.02 
 
         self.width=800
-        self.height=480      
+        self.height=480 
 
         logging.info("Tracking Module initialized")
 
@@ -119,7 +119,7 @@ class ComputerVisionThread(threading.Thread):
                                     logging.debug(("Distance to center X: " + str(dWidth) + ", Y: " + str(dHeight)))
                                     logging.debug(("Radius: " + str(radius)))
 
-                                self.putEvent(self.name, (dWidth, dHeight, round(radius,2)))
+                                self.putEvent(self.name, (dWidth, dHeight, round(radius,2)))                   
                         else:
                             self.putEvent(self.name, (0, 0, 0))
 
@@ -136,13 +136,16 @@ class ComputerVisionThread(threading.Thread):
                     break
         except picamera.PiCameraValueError:
             logging.error("PiCameraValueError")
-            pass         
+        finally:
+            logging.error("camera.close")
+            camera.close()
         
     #Override method  
     def join(self, timeout=None):
         #Stop the thread and wait for it to end
         logging.info("Killing Tracking Thread...") 
         self._stopEvent.set()
+        time.sleep(1)
         threading.Thread.join(self, timeout) 
 
     def getEvent(self, timeout=2):

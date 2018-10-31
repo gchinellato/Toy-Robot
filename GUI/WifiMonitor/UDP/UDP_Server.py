@@ -64,7 +64,10 @@ class UDP_ServerThread(threading.Thread):
                 strData = strData.decode("utf-8")
                 data = self.parseData(strData)
                 print(data)
-                self.putMessage(self.name, data)
+                if data != None:
+                    #print(len(data))
+                    if len(data) >= 14:
+                        self.putMessage(self.name, data)
             except queue.Full:
                 if (self.debug & MODULE_SERVER_UDP):
                     logging.debug("Queue Full")

@@ -34,6 +34,7 @@ import Queue as queue
 import pygame
 import argparse
 import os
+import subprocess
 
 def argParse():
     #Construct the argument parse and parse the arguments
@@ -50,7 +51,7 @@ def main(args):
             logging.info("Verboseity level: " + str(args.get("verbosity")))
 
         #Set modules to print according verbosity level
-        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_SERIAL | MODULE_CLIENT_UDP
+        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_SERIAL # | MODULE_CLIENT_UDP
 
         #Eyes init
         GPIO.setwarnings(False)
@@ -76,8 +77,8 @@ def main(args):
         #UDP Client thread
         clientUDP = UDP_ClientThread(name=CLIENT_UDP_NAME, queue=clientUDPQueue, debug=debug, UDP_IP="192.168.0.100", UDP_PORT=5000)
         clientUDP.daemon = True
-        threads.append(clientUDP)
-        clientUDP.start()
+        #threads.append(clientUDP)
+        #clientUDP.start()
 
         #UDP Server thread
         serverUDP = UDP_ServerThread(name=SERVER_UDP_NAME, queue=eventQueue, debug=debug, UDP_IP="", UDP_PORT=5001)
@@ -125,6 +126,8 @@ def main(args):
         lastTime = 0.0
         LP = 0.0
         runSpeedMax = RUN_SPEED
+        runSpeed_last = 0.0
+        speedA = 0.8
 
         trackingEn = False
 
@@ -151,8 +154,13 @@ def main(args):
                             #Body run speed
                             if event[1].axis == joy.A_L3_V:
                                 runSpeed = -event[1].value
+
+                                if runSpeed < runSpeed_last:
+                                    runSpeed = (float)(speedA*runSpeed_last) + (runSpeed*(1-speedA))
+
                                 runSpeed = serial.convertTo(runSpeed, ANALOG_MAX, ANALOG_MIN, runSpeedMax, -runSpeedMax)
                                 serial.putMessage(DIRECTION, runSpeed)
+                                runSpeed_last = runSpeed
                             #Body turn speed
                             if event[1].axis == joy.A_L3_H:
                                 turnSpeed = -event[1].value
@@ -190,6 +198,10 @@ def main(args):
                                 runSpeedMax = RUN_SPEED*5
                                 logging.info("Button press L1: " + str(runSpeedMax))
 
+                            if event[1].button == joy.B_L2:
+                                subprocess.Popen(['omxplayer','-b','/mnt/nfs/MynameisiStalker.mp3'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)  
+                                logging.info("Button press L2")
+
                             if event[1].button == joy.B_R2:
                                 serial.putMessage(POS_PID, 1)
                                 logging.info("Button press R2")
@@ -219,7 +231,7 @@ def main(args):
                     elif event[0] == SERVER_UDP_NAME:
                         logging.debug(event[1])  
                         if event[1][0] == "e8912037a63d":
-                            headH = -float(event[1][2])
+                            headH = float(event[1][2])
                             headH = panTilt.convertTo(headH, 50, -50, ANALOG_MAX, ANALOG_MIN)
                             panTilt.putEvent((None, headH))                            
                             #headV = float(event[1][2])
@@ -266,15 +278,17 @@ def main(args):
 
                         #Delta measure from object up to center of the vision
                         dWidth, dHeight, radius = event[1]
-
+                           
                         if (radius > 10):
+                            #subprocess.Popen(['omxplayer','-b','/mnt/nfs/Opabolinhaverde.mp3'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)                 
                             GPIO.output(LED_RED_GPIO, 1)
                             GPIO.output(LED_GREEN_GPIO, 0)
-                            GPIO.output(LED_BLUE_GPIO, 0)
+                            GPIO.output(LED_BLUE_GPIO, 0)  
+                            time.sleep(1)                
                         else:
                             GPIO.output(LED_RED_GPIO, 0)
                             GPIO.output(LED_GREEN_GPIO, 1)
-                            GPIO.output(LED_BLUE_GPIO, 1) 
+                            GPIO.output(LED_BLUE_GPIO, 1)
 
                         #Get current head angles
                         angleV, angleH = panTilt.getScaledAngles()
@@ -308,7 +322,6 @@ def main(args):
                                     angle = -20.0
                             headH = panTilt.convertTo(angleH+angle, ANGLE_MAX, ANGLE_MIN, ANALOG_MAX, ANALOG_MIN)
                             panTilt.putEvent((None, headH))
-
                         tracking.block.clear()
             except queue.Empty:
                 #if (debug & MODULE_MANAGER):

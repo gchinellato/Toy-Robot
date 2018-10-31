@@ -9,6 +9,9 @@ from time import ctime
 import os
 from gtts import gTTS
 
+#sys.setdefaultencoding('utf8')  #sys.setdefaultencoding('utf8')
+
+
 mic_name = "USB Audio Device: - (hw:1,0)"
 sample_rate = 8000
 chunk_size = 2048
@@ -17,26 +20,29 @@ def writeen(writeString):
     print(writeString)
 
 def speaken(audioString):
-    tts = gTTS(text=audioString, lang='en')
+    tts = gTTS(text=audioString, lang='pt')
     sfile = audioString.strip("?!@#$%*()_*'+- .,")
     sfile = sfile.replace(" ", "")
     sfile = sfile.replace(",", "")
     sfile = sfile.replace("'", "")
-    os.system('omxplayer /home/pi/Music/' + sfile + '.mp3') # reproduzir som 
+    #os.system('omxplayer /home/pi/Music/' + sfile + '.mp3') # reproduzir som 
+    os.system('mplayer /home/gchinellato/Projects/Toy-Robot/nfs-server' + sfile + '.mp3')
     
 def songfile(audioString):
-    tts = gTTS(text=audioString, lang='en')
+    tts = gTTS(text=audioString, lang='pt')
     sfile = audioString.strip("?!@#$%*()_*'+- .,")
     sfile = sfile.replace(" ", "")
     sfile = sfile.replace(",", "")
     sfile = sfile.replace("'", "")
 
-    if os.path.isfile("/home/pi/Music/" +  sfile + ".mp3"):
+    #if os.path.isfile("/home/pi/Music/" +  sfile + ".mp3"):
+    if os.path.isfile("/home/gchinellato/Projects/Toy-Robot/nfs-server" +  sfile + ".mp3"):
         Thread(target=speaken, args=(audioString,)).start()
         time.sleep(.85)
         Thread(target=writeen, args=(audioString,)).start()
     else:
-        tts.save("/home/pi/Music/" + sfile + ".mp3")
+        #tts.save("/home/pi/Music/" + sfile + ".mp3")
+        tts.save("/home/gchinellato/Projects/Toy-Robot/nfs-server" + sfile + ".mp3")
         Thread(target=speaken, args=(audioString,)).start()
         time.sleep(.95)
         Thread(target=writeen, args=(audioString,)).start()
@@ -50,23 +56,14 @@ def speakpt(audioString):
 
 def recordAudio():
     r = sr.Recognizer()
-    mic_list = sr.Microphone.list_microphone_names() 
-    print(mic_list)
-    
-    for i, microphone_name in enumerate(mic_list): 
-        if microphone_name == mic_name: 
-            device_id = i
-            print(device_id)
- 
-    with sr.Microphone(device_index = device_id, sample_rate = sample_rate, chunk_size = chunk_size) as source:
+    with sr.Microphone(device_index = 2, sample_rate = 48000) as source:
         #print("Say something..")
-        r.adjust_for_ambient_noise(source) 
-        audio = r.listen(source) 
-        #audio = r.record(source, duration = 2)
-    data = None    
+        audio = r.record(source, duration = 2)
+        #audio = r.listen(source)
+    data = ""
     try:
-        # Uses the default API key
-        # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # Uses the default API key
+            # To use another API key: `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
         data = r.recognize_google(audio, language='en-us') #en-us pt-BR'
         print("I understand: " + data) 
     except sr.UnknownValueError:
@@ -74,6 +71,7 @@ def recordAudio():
     except sr.RequestError as e:
         print("Could not request results from Google Speech Recognition service; {0}".format(e))
     return data
+
 
 def jarvis(data):
     ###english###
@@ -110,29 +108,30 @@ def jarvis(data):
         #Thread(target=answer, args=("no",)).start() 
 
     ###Portugues###
-    if "Como você esta" in data:
-        speakpt("Eu estou bem")
- 
-    if "diga sim" in data:
-        speak("yes")
-        #answer("y")
-        
-    if "diga não" in data:
-        speakpt("Não")
-        #answer("n")
-        
-    if "Qual é o seu nome" in data:
-        speakpt("Eu ainda não sei meu nome")
-        
-    if "Qual seu nome" in data:
-        speakpt("Eu ainda não sei meu nome")
+#    if "Como você esta" in data:
+#        speakpt("Eu estou bem")
+# 
+#    if "diga sim" in data:
+#        speak("yes")
+#        #answer("y")
+#        
+#    if "diga não" in data:
+#        speakpt("Não")
+#        #answer("n")
+#        
+#    if "Qual é o seu nome" in data:
+#        speakpt("Eu ainda não sei meu nome")
+#        
+#    if "Qual seu nome" in data:
+#        speakpt("Eu ainda não sei meu nome")
 
-Thread(target=songfile, args=("Hi, what can I do for you?",)).start()
-songfile('Hi, what can I do for you?')  
+#Thread(target=songfile, args=("Hi, what can I do for you?",)).start()
+songfile('Eu sou o aiStaur')  
 time.sleep(.5)
 
-while 1:
-    data = recordAudio()
-    #jarvis(data)
-    time.sleep(1)
+
+#while 1:
+#    data = recordAudio()
+#    jarvis(data)
+
 

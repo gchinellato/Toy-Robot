@@ -18,7 +18,7 @@ POS_NEUTRAL = 50 # Default position 90 degreee (neutral)
 HORIZONTAL_MAX = 55
 HORIZONTAL_MIN = 25
 
-VERTICAL_MAX = 20
+VERTICAL_MAX = 25
 VERTICAL_MIN = 10
 
 #Angle limits

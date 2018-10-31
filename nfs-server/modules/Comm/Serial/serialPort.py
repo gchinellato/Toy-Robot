@@ -85,15 +85,15 @@ class SerialThread(threading.Thread):
                     self.callbackFile(str(LOG_MSG))
 
                 #Sending UDP packets...
-                if msgList != None:
-                    #(module),(data1),(data2),(data3),(...)(#)
-                    UDP_MSG = CMD_SERIAL
-                    for msg in msgList:
-                        UDP_MSG += ("," + msg)
-                    UDP_MSG += "#"
+                #if msgList != None:
+                #    #(module),(data1),(data2),(data3),(...)(#)
+                #    UDP_MSG = CMD_SERIAL
+                #    for msg in msgList:
+                #        UDP_MSG += ("," + msg)
+                #    UDP_MSG += "#"
 
-                if (self.callbackUDP != None and UDP_MSG != None):
-                    self.callbackUDP(UDP_MSG)
+                #if (self.callbackUDP != None and UDP_MSG != None):
+                #    self.callbackUDP(UDP_MSG)
             except queue.Empty:
                 if (self.debug & MODULE_SERIAL):
                     logging.debug("Queue Empty")
