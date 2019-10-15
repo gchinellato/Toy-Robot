@@ -44,10 +44,12 @@ This project is based on the following topics:
 * PlatformIO: http://platformio.org/
 * Visual Code IDE: https://code.visualstudio.com/
 
+## Images
 <p align="center">
   <img src="https://github.com/gchinellato/Toy-Robot/blob/master/docs/istalker-feira.jpg?raw=true" alt="iStalker"/>
+  <a href="http://www.youtube.com/watch?feature=player_embedded&v=8wMRImB8lHo" target="_blank"><img src="http://img.youtube.com/vi/8wMRImB8lHo/0.jpg" 
+alt="iStalker" width="240" height="180" border="10" /></a>
 </p>
 
-[![iStalker](http://img.youtube.com/vi/8wMRImB8lHo/0.jpg)](http://www.youtube.com/watch?v=8wMRImB8lHo)
-
+## Final Paper
 [Final paper](../blob/master/docs/4_0_iSTALKER___Rob__Auto_Equilibrado_Atuado_por_Duas_Rodas.pdf)
