@@ -54,4 +54,4 @@ alt="iStalker"/></a>
 </p>
 
 ## Final Paper
-[iSTALKER Robo AutoEquilibrado Atuado por Duas Rodas](../blob/master/docs/4_0_iSTALKER___Rob__Auto_Equilibrado_Atuado_por_Duas_Rodas.pdf)
+[iSTALKER Robo AutoEquilibrado Atuado por Duas Rodas](../docs/4_0_iSTALKER___Rob__Auto_Equilibrado_Atuado_por_Duas_Rodas.pdf)
