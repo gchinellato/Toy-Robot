@@ -2,12 +2,13 @@
 _IMT - Final Project_
 
 ## Description
-iStalker is a DIY project based on the self balancing robot concept using sensors to get orientation (pitch, roll and yaw) and PID controller to set the motor speed. Beside that, there are some additional features like wireless controllers by IP or bluetooth clients, computer vision functions like object tracking, video streaming to be used such as FPV VR.
+iStalker is a DIY project based on the self balancing robot concept using sensors to get orientation (pitch, roll and yaw) and PID controller to set the motor speed. Beside that, there are some additional features like wireless controllers by IP or bluetooth clients, computer vision functions like object tracking and video streaming to be used such as FPV VR.
 
 ## Study topics
 This project is based on the following topics:
 * Raspberry PI     
 * Linux OS
+* FreeRTOS
 * Python programming
 * C++ programming
 * Multithread/Multiprocess programming
