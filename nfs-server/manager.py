@@ -51,7 +51,7 @@ def main(args):
             logging.info("Verboseity level: " + str(args.get("verbosity")))
 
         #Set modules to print according verbosity level
-        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_SERIAL # | MODULE_CLIENT_UDP
+        debug = MODULE_MANAGER | MODULE_PANTILT | MODULE_BLUETOOTH | MODULE_SERIAL | MODULE_CLIENT_UDP
 
         #Eyes init
         GPIO.setwarnings(False)
@@ -77,8 +77,8 @@ def main(args):
         #UDP Client thread
         clientUDP = UDP_ClientThread(name=CLIENT_UDP_NAME, queue=clientUDPQueue, debug=debug, UDP_IP="192.168.0.100", UDP_PORT=5000)
         clientUDP.daemon = True
-        #threads.append(clientUDP)
-        #clientUDP.start()
+        threads.append(clientUDP)
+        clientUDP.start()
 
         #UDP Server thread
         serverUDP = UDP_ServerThread(name=SERVER_UDP_NAME, queue=eventQueue, debug=debug, UDP_IP="", UDP_PORT=5001)
@@ -95,8 +95,8 @@ def main(args):
         #Log File thread
         logFile = LogFileThread(name=LOG_FILE_NAME, queue=logFileQueue, debug=debug)
         logFile.daemon = True
-        #threads.append(logFile)
-        #logFile.start()
+        threads.append(logFile)
+        logFile.start()
 
         #Serial thread
         serial = SerialThread(name=SERIAL_NAME, queue=serialToWrite, COM="/dev/ttyUSB0", debug=debug, callbackUDP=clientUDP.putMessage, callbackFile=logFile.putMessage)
@@ -165,7 +165,7 @@ def main(args):
                             if event[1].axis == joy.A_L3_H:
                                 turnSpeed = -event[1].value
                                 turnSpeed = serial.convertTo(turnSpeed, ANALOG_MAX, ANALOG_MIN, 3, -3)
-                                serial.putMessage(STEERING, turnSpeed)
+                                #serial.putMessage(STEERING, turnSpeed)
 
                         if event[1].type == pygame.JOYBUTTONDOWN or event[1].type == pygame.JOYBUTTONUP:
                             if event[1].button == joy.B_START:
@@ -215,12 +215,14 @@ def main(args):
                                 GPIO.output(LED_RED_GPIO, 0)
                                 GPIO.output(LED_GREEN_GPIO, 1)
                                 GPIO.output(LED_BLUE_GPIO, 1)
+                                serial.putMessage(STEERING, 0)
 
                             if event[1].button == joy.B_CIRC:
                                 logging.info("Button Circle")
                                 GPIO.output(LED_RED_GPIO, 1)
                                 GPIO.output(LED_GREEN_GPIO, 0)
                                 GPIO.output(LED_BLUE_GPIO, 0)
+                                serial.putMessage(STEERING, 10.0)
                         
                             if event[1].button == joy.B_TRI:                                
                                 trackingEn ^= 1

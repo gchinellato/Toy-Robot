@@ -183,8 +183,10 @@ void control(void *pvParameter)
                 (abs(anglePIDInput) > (abs(gConfig.calibratedZeroAngle)-gConfig.anglePIDLowerLimit) && 
                 abs(anglePIDInput) < (abs(gConfig.calibratedZeroAngle)+gConfig.anglePIDLowerLimit)))
             {
-                motor1.setSpeedPercentage(anglePIDOutput+headingPIDOutput);
-                motor2.setSpeedPercentage(anglePIDOutput-headingPIDOutput);
+                //motor1.setSpeedPercentage(anglePIDOutput+headingPIDOutput);
+                //motor2.setSpeedPercentage(anglePIDOutput-headingPIDOutput);
+                motor1.setSpeedPercentage(anglePIDOutput+gConfig.steering);
+                motor2.setSpeedPercentage(anglePIDOutput+gConfig.steering);
             } else 
             {
                 motor1.motorOff();
