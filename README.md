@@ -13,6 +13,7 @@ This project is based on the following topics:
 * C++ programming
 * Multithread/Multiprocess programming
 * Robotics concepts
+* PID Controller
 * IMU sensor fusion
 * Computer Vision
 * Communication protocols (UART, I2C, SPI, TCP, UDP...)
